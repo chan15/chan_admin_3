@@ -1,0 +1,47 @@
+.index-center {
+    width: 600px;
+    margin: 0 auto 0 auto;
+}
+label.error {
+    color: red;
+    font-size: 12px;
+}
+.modal {
+    text-align: center;
+}
+#btn-save-sort {
+    display: none;
+}
+span.validation-error {
+    margin-left: 6px;
+    color: red;
+}
+.control-group label {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 14px;
+    font-weight: normal !important;
+    line-height: 20px
+}
+.control-group input {
+    float: left;
+    margin: 4px 8px 0 0 !important;
+}
+.tab-content label{
+    font-weight: bold;
+}
+.tab-pane {
+    margin-bottom: 6px;
+}
+.clear {
+    clear: both;
+}
+div.pagination-container {
+    text-align: right;
+}
+.sort-move {
+    cursor: move;
+}
+div.row {
+    margin: 6px 0;
+}

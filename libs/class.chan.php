@@ -1016,10 +1016,10 @@ class chan {
      * 傳回指定的資料
      */
     function retData($fields = array(), $where = '') {
-        $fields = implode(', ', $fields);
+        $fields = implode(', ', preg_replace('/^(.*?)$/', "`$1`", $fields));
         $sql = sprintf("SELECT %s FROM %s WHERE %s",
             $fields,
-            $this->table,
+            '`'.$this->table.'`',
             $where);
         return $this->myOneRow($sql);
     }

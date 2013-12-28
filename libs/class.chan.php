@@ -1,100 +1,109 @@
 <?php
-/**
- * 主功能
- */
 class chan {
-    // 資料庫相關
-    var $charset          = 'UTF-8'; // 預設編碼
-    var $host             = ''; // Server
-    var $db               = ''; // 資料庫名稱
-    var $username         = ''; // 帳號
-    var $password         = ''; // 密碼
+    // Database variable
+    var $charset          = 'UTF-8';
+    var $host             = '';
+    var $db               = '';
+    var $username         = '';
+    var $password         = '';
     var $conn             = '';
     var $makeRecordCount  = true;
-    var $recordCount      = 0; // recordset count
-    var $totalRecordCount = 0; // total recordset count
-    var $lastInsertId     = 0; // 資料庫最新的一筆 id
-    var $fieldArray       = array(); // 欄位陣列
-    var $valueArray       = array(); // 值陣列
-    var $sqlError         = ''; // sql 語法錯誤文字
-    var $table            = ''; // table
-    var $pk               = ''; // primary key
-    var $pkValue          = ''; // primary key value
+    var $recordCount      = 0;
+    var $totalRecordCount = 0;
+    var $lastInsertId     = 0;
+    var $fieldArray       = array();
+    var $valueArray       = array();
+    var $sqlErrorMessage  = '';
+    var $table            = '';
+    var $pk               = '`id`';
+    var $pkValue          = '';
 
-	// Email 相關
-    var $emailDebug    = false; // 是否顯示 Email 錯誤，true 顯示 false 不顯示
-	var $emailFrom     = '';
-	var $emailTo       = '';
-	var $emailFromName = '';
-	var $emailSubject  = '';
-	var $emailContent  = '';
+    // Email variable
+    var $emailDebug    = false;
+    var $emailFrom     = '';
+    var $emailTo       = '';
+    var $emailFromName = '';
+    var $emailSubject  = '';
+    var $emailContent  = '';
 
-    // 預設參數
+    // Default variable
     var $meta            = '<meta http-equiv = "Content-Type" content = "text/html; charset = utf-8" />';
-    var $thumbDebug      = false; // 是否顯示縮圖錯誤，true 顯示 false 不顯示
-    var $loginPage       = 'login.php'; // 預設登入頁面
-    var $fileDeleteArray = array(); // image delete array
+    var $thumbDebug      = false;
+    var $loginPage       = 'login.php';
+    var $fileDeleteArray = array();
     
-    // Server 驗證參數
-    var $captchaSource   = 'images/captcha/'; // captcha 圖片路徑
-    var $validateArray     = array(); // Server 驗證欄位
-    var $validateMessage = ''; // Server 驗證訊息
-    var $validateError   = false; // 是否有誤
+    // Server validate variable
+    var $captchaSource   = 'images/captcha/';
+    var $validateArray   = array();
+    var $validateMessage = '';
+    var $validateError   = false;
     
-    // 資料參數
-    var $page       = 0; // 現在頁面參數
-    var $totalPages = 0; // 總分頁數量
+    // Data variable
+    var $page       = 0;
+    var $totalPages = 0;
 
-    // 圖片上傳參數
-    var $imageUploadRatio   = 1000; // 預設最大寬度
-    var $imageUploadAllowed = array('image/*'); // 預設圖片格式
-    var $imageUploadSize    = 2097152; // 預設檔案大小 2MB
+    // Image variable
+    var $imageUploadRatio   = 1000;
+    var $imageUploadAllowed = array('image/*');
+    var $imageUploadSize    = 2097152;
 
-    // 檔案上傳參數
-    var $fileUploadAllowed = array('image/*, application/*, archives/zip'); // 預設檔案格式
-    var $fileUploadSize    = 5242880; // 預設檔案大小 5MB
+    // File variable
+    var $fileUploadAllowed = array('image/*, application/*, archives/zip');
+    var $fileUploadSize    = 5242880;
+
+    // Language variable
+    private $_langPrevPage = '上一頁';
+    private $_langFirstPage = '第一頁';
+    private $_langNextPage = '下一頁';
+    private $_langLastPage = '最後頁';
+    private $_langInput = '請填寫';
+    private $_langDuplicate = '重複';
+    private $_langFormatInvalid = '格式錯誤';
+    private $_langOverLength = '超過字數';
+    private $_langUrlError = '連結方式錯誤';
+    private $_langSelect = '請選擇';
+    private $_langFileNotExist = '檔案不存在';
     
-    /////////////////////////////////////////////////
-    // 環境處理
-    /////////////////////////////////////////////////
-
     /**
-     * 啟動 session
+     * Start Session
      */
     function sessionOn() {
         if (!isset($_SESSION)) session_start();
     }
         
-    /////////////////////////////////////////////////
-    // 資料處理
-    /////////////////////////////////////////////////
-    
     /**
-     * 執行 SQL 內容
-     * $sql - SQL 語法
+     * Execute sql
+     * @param string $sql SQL statement
      */
     function sqlExecute($sql) {
-        $ret = true;
         mysql_select_db($this->db, $this->conn);
+
         if (!mysql_query($sql, $this->conn)) {
-            $ret = false;
-            $this->sqlError = mysql_error();
+            $this->sqlErrorMessage = mysql_error();
+            return false;
         } else {
             $this->lastInsertId = mysql_insert_id();
         }
-        return $ret;
+
+        return true;
     }
 
     /**
-     * 資料庫連線
+     * Connect to database
      */
-    function dbConnect() {
-        $this->conn = mysql_connect($this->host, $this->username, $this->password) or trigger_error(mysql_error(),E_USER_ERROR);
+    function connect() {
+        $this->conn = mysql_connect($this->host, $this->username, $this->password) or trigger_error(mysql_error(), E_USER_ERROR);
         mysql_query("SET NAMES 'utf8'");
     }
 
     /**
-     * SQL Injection
+     * Prevent Sql Injection
+     *
+     * @param string $theValue Value
+     * @param string $type Sql Type
+     * @param string $theDefinedValue value self defined
+     * @param string $theNotDefinedValue value if not self defined
+     * @return mixed
      */
     function toSql($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") {
       if (PHP_VERSION < 6) {
@@ -107,41 +116,40 @@ class chan {
         case "text":
           $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
           break;    
-
         case "long":
         case "int":
           $theValue = ($theValue != "") ? intval($theValue) : "NULL";
           break;
-          
         case "double":
           $theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
           break;
-          
         case "date":
           $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
           break;
-          
         case "defined":
           $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
           break;
       }
+
       return $theValue;
     }
     
     /**
-     * 將table變數存進陣列
-     * $field - 欄位
-     * $value - 值
-     * $type - 型態
+     * Table field
+     * @param mixed $field filed
+     * @param mixed $value filed value
+     * @param string $type field type
      */
     function addField($field, $value, $type = 'text') {
-        $this->fieldArray[] = '`'.$field.'`';
+        $this->fieldArray[] = '`' . $field . '`';
         $this->valueArray[] = $this->toSql($value, $type);
     }
 
     /**
-     * 抓取檔案名稱
-     * $field - 欄位名稱
+     * Get file name from database
+     *
+     * @param string $field field name
+     * @return string
      **/
     function getFileName($field) {
         $sql = sprintf("SELECT %s FROM %s WHERE %s = %s",
@@ -154,26 +162,28 @@ class chan {
     }
 
     /**
-     * 刪除資料庫檔案功能
-     * $path - 路徑
+     * Delte file from database
+     * @param string $path file path
      **/
     function dataFileDelete($path) {
         if (count($this->fileDeleteArray) > 0) {
             if (is_dir($path)) {
                 foreach ($this->fileDeleteArray as $fileName) {
-                    @unlink($path.$fileName);
-
+                    @unlink($path . $fileName);
                     $fileDelHead = explode('.', $fileName);
-                    $thumbDir = $path.'/thumbnails/';
+                    $thumbDir = $path . '/thumbnails/';
                     $handle = @opendir($thumbDir);
+
                     while($file = readdir($handle)){
-                        if($file != "." && $file != ".."){
+                        if('.' !== $file && '..' !== $file){
                             $fileDel = explode('_', $file);
-                            if ($fileDelHead[0] == $fileDel[0]) {
-                                unlink($thumbDir.$file);
+
+                            if ($fileDelHead[0] === $fileDel[0]) {
+                                unlink($thumbDir . $file);
                             }
                         }
                     }
+
                     closedir($handle);
                 }
             }
@@ -181,7 +191,7 @@ class chan {
     }
 
     /**
-     * 新增資料功能
+     * Insert data
      */
     function dataInsert() {
         $sqlIns = sprintf("INSERT INTO %s (%s) VALUES(%s)",
@@ -194,36 +204,39 @@ class chan {
     }
     
     /**
-     * 更新資料功能
-     * $where - WHERE 條件
+     * Update data
+     *
+     * @param string $where defined where condition
      */
-    function dataUpdate($where = '') {
-        $sqlStr = array();
+    function dataUpdate($where = NULL) {
+        $sqlString = array();
+
         foreach ($this->fieldArray as $k => $v) {
-            $sqlStr[] = $v.' = '.$this->valueArray[$k];
+            $sqlString[] = $v . ' = ' . $this->valueArray[$k];
         }
         
-        if ($where == '') {
+        if (NULL === $where) {
             $where = sprintf("%s = %s",
                 $this->pk,
                 $this->toSql($this->pkValue, 'int'));
         }
 
-        $sqlUpd = sprintf("UPDATE %s SET %s WHERE %s",
+        $sqlUpdate = sprintf("UPDATE %s SET %s WHERE %s",
             $this->table,
-            implode(', ', $sqlStr),
+            implode(', ', $sqlString),
             $where);
 
         $this->clearFields();
-        return $this->sqlExecute($sqlUpd);
+        return $this->sqlExecute($sqlUpdate);
     }
     
     /**
-     * 刪除資料功能
-     * $where - WHERE 條件
+     * Delete data
+     *
+     * @param string $where defined where condition
      */
-    function dataDelete($where = '') {
-        if ($where == '') {
+    function dataDelete($where = NULL) {
+        if (NULL === $where) {
             $where = sprintf("%s = %s",
                 $this->pk,
                 $this->toSql($this->pkValue, 'int'));
@@ -238,7 +251,7 @@ class chan {
     }
     
     /**
-     * 清除欄位變數
+     * Clear fields
      */
     function clearFields() {
         $this->pk = '';
@@ -247,48 +260,46 @@ class chan {
         unset($this->valueArray);
     }
    
-    /////////////////////////////////////////////////
-    // 驗證處理
-    /////////////////////////////////////////////////
-    
     /**
-     * 檢查來源網址
+     * Check source url
      */
      function checkSourceUrl() {
-         if (stripos($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST']) == false) exit;
+         if (false === stripos($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST'])) {
+            die('Not the same domain');
+         }
      }
 
     /**
-     * 將驗證欄位加入陣列
-     * $name - 驗證名稱
-     * $field - 欄位名稱
-     * $type - 驗證型態 text, email, number, positive, boolean, file, duplicate
-     * $tableField - 若型態為 duplicate，要輸入 table 對應的名稱
-     * $limit - 字數限制
-     * $method - 傳送類型
+     * Add validate field
+     * @param string $name validate name
+     * @param string $field validate filed name
+     * @param string $type validate type (text, email, number, positive, boolean, file, duplicate)
+     * @param string $tableField if type equal to duplicate need to type table name
+     * @param integer $limit string max length
+     * @param string $method form method
      */
     function addValidateField($name, $field, $type = 'text', $tableField = '', $limit = 0, $method = 'POST') {
-        array_push($this->validateArray, array(
-            'name' => $name,
-            'field' => $field,
-            'type' => $type,
-            'tableField' => '`'.$tableField.'`',
-            'limit' => $limit,
-            'method' => $method)
-        );
+        array_push($this->validateArray,
+            array(
+                'name'       => $name,
+                'field'      => $field,
+                'type'       => $type,
+                'tableField' => '`' . $tableField . '`',
+                'limit'      => $limit,
+                'method'     => $method)
+            );
     }
     
     /**
-     * 驗證欄位功能
-     * 先將所需要的欄位使用 addValidateField 加入以後執行此功能
-     * 若有缺少內容或者是型態錯誤會將變數 validateError 宣告為 true
-     * 並且把錯誤訊息寫入 validateMessage
+     * Server validate
+     *
+     * @return result
      */
     function serverValidate() {
-        $emailPattern = '/^\w+[\w\+\.\-]*@\w+(?:[\.\-]\w+)*\.\w+$/i'; // Email正規化
-        $numberPattern = '/[0-9]/'; // 數字正規化
-        $positvePattern = '/^\d+$/'; // 正整數正規化
-        $booleanPattern = '/^\d{0,1}+$/'; // 正規化布林值
+        $emailPattern = '/^\w+[\w\+\.\-]*@\w+(?:[\.\-]\w+)*\.\w+$/i';
+        $numberPattern = '/[0-9]/';
+        $positvePattern = '/^\d+$/';
+        $booleanPattern = '/^\d{0,1}+$/';
         
         foreach ($this->validateArray as $v) {
             $value = ($v['type'] == 'file') ? @$_FILES[$v['field']]['name'] : (($v['method'] == 'POST') ? @$_POST[$v['field']] : @$_GET[$v['field']]);
@@ -297,18 +308,19 @@ class chan {
             $tableField = $v['tableField'];
             $limit = $v['limit'];
 
-            if (trim($value) == '') { // 檢查是否為空值
-                $this->validateMessage .= '請填寫'.$name.'<br>';
+            if ('' === trim($value)) {
+                // Check if empty value
+                $this->validateMessage .= $this->_langInput . $name . '<br>';
                 $this->validateError = true;
             } else {
                 switch ($type) {
-                    case 'email': $pattern = $emailPattern; break; // Email格式
-                    case 'number': $pattern = $numberPattern; break; // 數字格式
-                    case 'positive': $pattern = $positvePattern; break; // 正整數格式
-                    case 'boolean': $pattern = $booleanPattern; break; // 布林值格式
+                    case 'email': $pattern = $emailPattern; break;
+                    case 'number': $pattern = $numberPattern; break;
+                    case 'positive': $pattern = $positvePattern; break;
+                    case 'boolean': $pattern = $booleanPattern; break;
                     case 'duplicate':
-                        // 檢查有沒有重複
-                        if ($this->pk == '') {
+                        if ('' === $this->pk) {
+                            // Check if duplicate
                             $sql = sprintf("SELECT * FROM %s WHERE %s = %s",
                                 $this->table,
                                 $tableField,
@@ -325,18 +337,20 @@ class chan {
                         $row = $this->myOneRow($sql);
 
                         if ($row) {
-                            $this->validateMessage .= $name.'重複<br>';
+                            $this->validateMessage .= $name . $this->_langDuplicate . '<br>';
                             $this->validateError = true;
                         }
+
                         break;
                     default: $pattern = '';
                 }
-                if (!empty($pattern) && !preg_match($pattern, $value)) { // 檢查正規化
-                    $this->validateMessage .= $name.'格式錯誤<br>';
+
+                if (!empty($pattern) && !preg_match($pattern, $value)) {
+                    $this->validateMessage .= $name . $this->_langFormatInvalid . '<br>';
                     $this->validateError = true;
                 } else {
                     if ($limit > 0 && mb_strlen($value, $this->charset) > $limit) {
-                        $this->validateMessage .= $name.'超過字數<br>';
+                        $this->validateMessage .= $name . $this->_langOverLength . '<br>';
                         $this->validateError = true;
                     }
                 }
@@ -347,23 +361,21 @@ class chan {
     }
     
     /**
-     * 呈現驗證錯誤訊息
+     * Show validate error message
      */
-    function showValidateMsg() {
-        if ($this->validateError) {
+    function showValidateMessage() {
+        if (true === $this->validateError) {
             echo $this->meta;
             echo $this->validateMessage;
             exit;            
         }
     }
     
-    /////////////////////////////////////////////////
-    // 資料處理
-    /////////////////////////////////////////////////
-    
     /**
-     * 取出單筆資料
-     * $sql - SQ L語法
+     * Get one data
+     *
+     * @param string $sql sql statement
+     * @return data|NULL
      */
     function myOneRow($sql) {
         mysql_select_db($this->db, $this->conn);
@@ -371,69 +383,79 @@ class chan {
         $row = mysql_fetch_assoc($rec);
         $num = mysql_num_rows($rec);
         $count = mysql_num_fields($rec);
-        $ret = array();
+        $result = array();
         
         if ($num > 0) {
             $temp = array();
+
             for ($i = 0; $i < $count; $i++) {
                 $name = mysql_field_name($rec, $i);
-                $ret[$name] = $row[$name];
+                $result[$name] = $row[$name];
             }
         } else {
-            $ret = 0;
+            $result = NULL;
         }
         
         mysql_free_result($rec);
-
-        return $ret;
+        return $result;
     }
     
     /**
-     * 將Sql結果存成陣列傳回
-     * $sql - SQL 語法
+     * Get data
+     *
+     * @param string $sql sql statement
+     * @return data|NULL
      */
     function myRow($sql) {
         mysql_select_db($this->db, $this->conn);
         $rec = mysql_query($sql, $this->conn) or die(mysql_error());
         $row = mysql_fetch_assoc($rec);
         $this->recordCount = mysql_num_rows($rec);
+
         if ($this->makeRecordCount) {
             $this->totalRecordCount = $this->recordCount;
         }
+
         $count = mysql_num_fields($rec);
         
         if ($this->recordCount > 0) {
-            $ret = array();
+            $result = array();
             $temp = array();
+
             do {
                 for ($i = 0; $i < $count; $i++) {
                     $name = mysql_field_name($rec, $i);
                     $temp[$name] = $row[$name];
                 }
 
-                array_push($ret, $temp);
+                array_push($result, $temp);
             } while($row = mysql_fetch_assoc($rec));
         } else {
-            $ret = 0;
+            $result = NULL;
         }
         
         mysql_free_result($rec);
-
-        return $ret;
+        return $result;
     }
     
     /**
-     * 分頁資料及
-     * $sql - SQL 語法
-     * $max - 一頁最多幾筆資料
+     * Get data by limit
+     *
+     * @param string $sql sql statement
+     * @param integer $max data per page
+     * @return data
      */
     function myRowList($sql, $max = 10) {
         $this->page = isset($_GET['page']) ? $_GET['page'] : 0;
-        $startRow = $this->page*$max;
+        $startRow = $this->page * $max;
         $row = $this->myRow($sql);
-        if (!$row) return 0;
+
+        if (NULL === $row) {
+            return NULL;
+        }
+
         $this->totalRecordCount = count($row);
-        $this->totalPages = ceil($this->totalRecordCount/$max)-1;
+        $this->totalPages = ceil($this->totalRecordCount / $max) - 1;
         $sqlPages = sprintf("%s LIMIT %d, %d", $sql, $startRow, $max);
         $this->makeRecordCount = false;
         $row = $this->myRow($sqlPages);
@@ -441,184 +463,217 @@ class chan {
     }
    
     /**
-     * 組合網頁參數字串
-     * $str - 使用的字串
+     * Combine url param
+     *
+     * @param string $string combine string
+     * @return string
      */
-    function combineQueryString($str) {
-        $ret = '';
+    function combineQueryString($string) {
+        $result = '';
+
         if (!empty($_SERVER['QUERY_STRING'])) {
-          $params = explode("&", $_SERVER['QUERY_STRING']);
-          $newParams = array();
-          foreach ($params as $param) {
-            if (!stristr($param, $str)) {
-              array_push($newParams, $param);
+            $params = explode('&', $_SERVER['QUERY_STRING']);
+            $newParams = array(); 
+            
+            foreach ($params as $param) {
+               if (!stristr($param, $string)) {
+                   array_push($newParams, $param);
+               }
             }
-          }
-          if (count($newParams) != 0) {
-            $ret = "&".htmlentities(implode("&", $newParams));
-          }
+            
+            if (0 !== count($newParams)) {
+                $result = '&' . htmlentities(implode('&', $newParams));
+            }
         }
         
-        return $ret;
+        return $result;
     }
     
     /**
-     * 使用預設分頁模組
-     * $limit - 最多出現的頁碼數量
+     * Default pager
+     * 
+     * @param integer $limit data per page
+     * @return string
      */
     function pager($limit = 5) {
         $sep = '&nbsp;';
-        $ret = '';
-        // $ret .= $this->pageString('first').$sep;
-        $ret .= $this->pageString('prev',' ',"prev").$sep;
-        $ret .= $this->pageNumber($limit).$sep;
-        $ret .= $this->pageString('next',' ',"next").$sep;
-        // $ret .= $this->pageString('last').$sep;
-        return $ret;
+        $result = '';
+        $result .= $this->pageString('prev', NULL, 'prev') . $sep;
+        $result .= $this->pageNumber($limit) . $sep;
+        $result .= $this->pageString('next', NULL, 'next') . $sep;
+        return $result;
     } 
 
     /**
-     * bootstrap pager
-     * @$limit 每次頁數
+     * Bootstrap pager
+     *
+     * @param integer $limit data per page
+     * @return string
      */
     function bootstrapPager($limit = 6) {
         $currentPage = $_SERVER["PHP_SELF"];
-        $ret = '';
-        $ret .= '<ul class="pagination">';
+        $result = '';
+        $result .= '<ul class="pagination">';
         $limitLinksEndCount = $limit;
-        $temp = (int)($this->page+1);
-        $startLink = (int)(max(1, $temp-intval($limitLinksEndCount / 2)));
-        $temp = (int)($startLink+$limitLinksEndCount-1);
-        $endLink = min($temp, $this->totalPages+1);
+        $temp = intval(($this->page + 1));
+        $startLink = intval((max(1, $temp - intval($limitLinksEndCount / 2))));
+        $temp = intval(($startLink + $limitLinksEndCount - 1));
+        $endLink = min($temp, $this->totalPages + 1);
 
-        // prev page
+        // Prev page
         if ($this->page > 0) {
-            $ret .= sprintf('<li><a href="%s?page=%d%s">«</a></li>',
+            $result .= sprintf('<li><a href="%s?page=%d%s">«</a></li>',
                 $currentPage,
-                max(0, $this->page-1),
+                max(0, intval($this->page - 1)),
                 $this->combineQueryString('page'));
         } else {
-            $ret .= sprintf('<li class="disabled"><a>«</a></li>',
+            $result .= sprintf('<li class="disabled"><a>«</a></li>',
                 $currentPage,
-                max(0, $this->page-1),
+                max(0, intval($this->page - 1)),
                 $this->combineQueryString('page'));
         }
 
-        if ($endLink != $temp) $startLink = max(1, (int)($endLink-$limitLinksEndCount+1));
+        if ($endLink !== $temp) $startLink = max(1, intval(($endLink-$limitLinksEndCount + 1)));
 
         for ($i = $startLink; $i <= $endLink; $i++) {
-          $limitPageEndCount = $i-1;
-          if ($limitPageEndCount != $this->page) {
-          $ret .= sprintf('<li><a href="%s?page=%d%s">%s</a></li>',
-              $currentPage,
-              $limitPageEndCount,
-              $this->combineQueryString('page'),
-              $i);
-          } else {
-              $ret .= '<li class="disabled"><a>' . $i . '</a></li>';
-          }
+            $limitPageEndCount = $i - 1;
+            if ($this->page !== $limitPageEndCount) {
+                $result .= sprintf('<li><a href="%s?page=%d%s">%s</a></li>',
+                $currentPage,
+                $limitPageEndCount,
+                $this->combineQueryString('page'),
+                $i);
+            } else {
+                $result .= '<li class="disabled"><a>' . $i . '</a></li>';
+            }
         }
 
-        // next page
+        // Next page
         if ($this->page < $this->totalPages) {
-            $ret .= sprintf('<li><a href="%s?page=%d%s">»</a></li>',
+            $result .= sprintf('<li><a href="%s?page=%d%s">»</a></li>',
                 $currentPage,
-                min($this->totalPages, (int)($this->page+1)),
+                min($this->totalPages, intval($this->page + 1)),
                 $this->combineQueryString('page'));
         } else {
-            $ret .= sprintf('<li class="disabled"><a>»</a></li>',
+            $result .= sprintf('<li class="disabled"><a>»</a></li>',
                 $currentPage,
-                min($this->totalPages, (int)($this->page+1)),
+                min($this->totalPages, intval($this->page + 1)),
                 $this->combineQueryString('page'));
         }
 
-        $ret .= "</ul>";
+        $result .= "</ul>";
 
-        return $ret;
+        return $result;
     }
     
     /**
-     * 上下頁功能
-     * $method - 功能 prev: 上一頁, next: 下一頁
+     * Prev or nex page
+     *
+     * @param string $method prev or next
+     * @param string $string display word
+     * @param string $class css class name
+     * @return string
      */
-    function pageString($method, $string = '', $class = '') {
+    function pageString($method, $string = NULL, $class = '') {
         $currentPage = $_SERVER["PHP_SELF"];
-        $ret = '';
+        $result = '';
         
         switch ($method) {
-            case 'first': // 第一頁
+            case 'first':
                 if ($this->page > 0) {
-                    if ($string == '') {
-                        $string = '第一頁';
+                    if (NULL === $string) {
+                        $string = $this->_langFirstPage;
                     }
-                    $ret = '<a href="'.sprintf("%s?page=%d%s", $currentPage, 0, $this->combineQueryString('page')).'" class="'.$class.'">'.$string.'</a>';
+                    $result = '<a href="' . sprintf("%s?page=%d%s",
+                        $currentPage, 
+                        0, 
+                        $this->combineQueryString('page')) . '" class="' . $class . '">' . $string . '</a>';
                 }
+
                 break;
-            case 'prev': // 上一頁
+            case 'prev':
                 if ($this->page > 0) {
-                    if ($string == '') {
-                        $string = '上一頁';
+                    if (NULL === $string) {
+                        $string = $this->_langPrevPage;
                     }
-                    $ret = '<a href="'.sprintf("%s?page=%d%s", $currentPage, max(0, $this->page-1), $this->combineQueryString('page')).'" class="'.$class.'">'.$string.'</a>';
+                    $result = '<a href="' . sprintf("%s?page=%d%s",
+                        $currentPage, 
+                        max(0, $this->page - 1), 
+                        $this->combineQueryString('page')) . '" class="' . $class . '">' . $string . '</a>';
+                }
+
+                break;
+            case 'next':
+                if ($this->page < $this->totalPages) {
+                    if (NULL === $string) {
+                        $string = $this->_langNextPage;
+                    }
+
+                    $result = '<a href="' . sprintf("%s?page=%d%s",
+                        $currentPage, 
+                        min($this->totalPages, $this->page + 1), 
+                        $this->combineQueryString('page')) . '" class="' . $class . '">' . $string . '</a>';
                 }
                 break;
-            case 'next': // 下一頁
+            case 'last':
                 if ($this->page < $this->totalPages) {
-                    if ($string == '') {
-                        $string = '下一頁';
+                    if (NULL === $string) {
+                        $string = $this->_langLastPage;
                     }
-                    $ret = '<a href="'.sprintf("%s?page=%d%s", $currentPage, min($this->totalPages, $this->page+1), $this->combineQueryString('page')).'" class="'.$class.'">'.$string.'</a>';
-                }
-                break;
-            case 'last': // 最後頁
-                if ($this->page < $this->totalPages) {
-                    if ($string == '') {
-                        $string = '最後頁';
-                    }
-                    $ret = '<a href="'.sprintf("%s?page=%d%s", $currentPage, $this->totalPages, $this->combineQueryString('page')).'" class="'.$class.'">'.$string.'</a>';
+
+                    $result = '<a href="' . sprintf("%s?page=%d%s",
+                        $currentPage,
+                        $this->totalPages,
+                        $this->combineQueryString('page')) . '" class="' . $class . '">' . $string . '</a>';
                 }
                 break;
         }
         
-        return $ret;
+        return $result;
     }
     
     /**
-     * 頁碼功能
-     * $limit - 最多出現的頁碼數量
-     * $set - 分隔符號
+     * Page number
+     *
+     * @param integer $limit data per page
+     * @param string $set seperation
+     * @return string
      */
     function pageNumber($limit = 5, $sep = '&nbsp;') {
-        $ret = '';
+        $result = '';
         $currentPage = $_SERVER["PHP_SELF"];
         $limitLinksEndCount = $limit;
-        $temp = $this->page+1;
-        $startLink = max(1,$temp-intval($limitLinksEndCount/2));
-        $temp = $startLink+$limitLinksEndCount-1;
-        $endLink = min($temp, $this->totalPages+1);
-        if($endLink != $temp) $startLink = max(1, $endLink-$limitLinksEndCount+1);
+        $temp = intval($this->page + 1);
+        $startLink = max(1, $temp - intval($limitLinksEndCount / 2));
+        $temp = intval($startLink + $limitLinksEndCount - 1);
+        $endLink = min($temp, $this->totalPages + 1);
+
+        if ($endLink !== $temp) {
+            $startLink = max(1, $endLink - $limitLinksEndCount + 1);
+        }
 
         for ($i = $startLink; $i <= $endLink; $i++) {
-          $limitPageEndCount = $i-1;
-          if ($limitPageEndCount != $this->page) {
-            $ret .= sprintf('<a href="'."%s?page=%d%s", $currentPage, $limitPageEndCount, $this->combineQueryString('page').'">');
-            $ret .= "$i</a>";
+          $limitPageEndCount = intval($i - 1);
+
+          if ($limitPageEndCount !== $this->page) {
+            $result .= sprintf('<a href="' . "%s?page=%d%s", $currentPage, $limitPageEndCount, $this->combineQueryString('page') . '">');
+            $result .= $i . '</a>';
           } else {
-            $ret .= "<strong>$i</strong>";
+            $result .= '<strong>' . $i. '</strong>';
           }
-          if($i != $endLink) $ret .= $sep;
+
+          if ($i !== $endLink) {
+              $result .= $sep;
+          }
         }
         
-        return $ret;
+        return $result;
     }
     
-    /////////////////////////////////////////////////
-    // 頁面處理
-    /////////////////////////////////////////////////
-    
     /**
-     * 登出功能
-     * $url - 登出後前往的網址
+     * Logout
+     *
+     * @param string url redirect page when logout
      */
     function logout($url = 'index.php') {
         $this->sessionOn();
@@ -627,7 +682,7 @@ class chan {
         if (isset($_COOKIE)) {
             foreach ($_COOKIE as $name => $value) {
                 $name = htmlspecialchars($name);
-                setcookie($name , "");
+                setcookie($name , '');
             }
         }
 
@@ -635,23 +690,7 @@ class chan {
     }
     
     /**
-     * 登出功能
-     * $url - 登出後前往的網址
-     */
-    function justLogout() {
-        $this->sessionOn();
-        session_destroy();
-        
-        if (isset($_COOKIE)) {
-            foreach ($_COOKIE as $name => $value) {
-                $name = htmlspecialchars($name);
-                setcookie($name , "");
-            }
-        }
-    }
-    
-    /**
-     * 將此頁儲存為登入前瀏覽最後頁面
+     * Save page to session as last visied page
      */
     function lastPage () {
         $this->sessionOn();
@@ -659,89 +698,90 @@ class chan {
     }
     
     /**
-     * 轉換頁面
-     * $url - 網址
+     * Redirect
+     *
+     * @param string $url redirect url
      */
     function reUrl($url) {
-        header(sprintf("Location: %s", $url));
+        header(sprintf('Location: %s', $url));
     }
     
     /**
-     * 限制登入等級
-     * $level - 等級的陣列，array(1, 2)
+     * Login level limitation
+     * 
+     * @param array $level level (array(1, 2, ...))
      */
     function loginLevel($level = array()) {
         $this->sessionOn();
         $this->loginNeed();
+
         if(!in_array(@$_SESSION['level'], $level)) {
             $this->reUrl($this->loginPage);
         }
     }
     
     /**
-     * 記住登入頁面
-     */
-    function rememberPage() {
-        $this->sessionOn();
-        $_SESSION['rememberPage'] = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-    }
-
-    /**
-     * 登入限制頁面
+     * Not login check
+     * only allow user who is not login
+     *
+     * @param string $url redirect page
      */
     function loginLimit($url = 'index.php') {
         $this->sessionOn();
-        if (isset($_SESSION['login'])) $this->reUrl($url);
+
+        if (isset($_SESSION['login'])) {
+            $this->reUrl($url);
+        }
     }
     
     /**
-     * 限制登入頁面
+     * Login check
+     * only allow user who is login
+     *
+     * @param string $url login page
      */
-    function loginNeed($url = '') {
+    function loginNeed($url = NULL) {
         $this->sessionOn();
         $this->lastPage();
-        if ($url == '') $url = $this->loginPage;
-        if (!isset($_SESSION['mita_email'])) $this->reUrl($url);
-    }
-    
-    /**
-     * JavaScript History Go
-     */
-    function jsHistory($str, $go) {
-        echo $this->meta;
-        echo '<script>';
-        echo 'alert("'.$str.'");';
-        echo 'history.go('.$go.');';
-        echo '</script>';
-        exit;
-    }
-    
-    /**
-     * JavaScript重導頁面
-     */
-    function jsRedirect($str, $url) {
-        echo $this->meta;
-        echo '<script>';
-        echo 'alert("'.$str.'");';
-        echo 'window.location = "'.$url.'";';
-        echo '</script>';
-        exit;
-    }
-    
-    /////////////////////////////////////////////////
-    // 其他功能
-    /////////////////////////////////////////////////
 
+        if (NULL === $url) {
+            $url = $this->loginPage;
+        }
+
+        if (!isset($_SESSION['login'])) {
+            $this->reUrl($url);
+        }
+    }
+    
     /**
-     * 製作 Excel
-     * $sql - sql 內容
-     * $titles - 標題
-     * $fields - 欄位
-     * $fileName - 檔名
+     * Redirect by JavaScript
+     *
+     * @param string $string alert string
+     * @param string $url redirect url
+     */
+    function jsRedirect($string = NULL, $url = NULL) {
+        echo $this->meta;
+        echo '<script>';
+        echo 'alert("' . $string . '");';
+        echo 'window.location = "' . $url . '";';
+        echo '</script>';
+        exit;
+    }
+    
+    /**
+     * Export data as excel
+     *
+     * @param string $sql sql statement
+     * @param array $titles title
+     * @param array $fields field name
+     * @param string $fileName file name
+     * @param integer $width default excel column width
      **/
-    function makeExcel($sql = '', $titles = array(), $fields = array(), $fileName = '', $width = 12) {
-        $class = dirname(__FILE__).'/PHPExcel.php';
-        if ($fileName == '') $fileName = date('YmdHis').rand(1000, 9999);
+    function makeExcel($sql = '', $titles = array(), $fields = array(), $fileName = NULL, $width = 12) {
+        $class = dirname(__FILE__) . '/PHPExcel.php';
+        if (NULL === $fileName) {
+            $fileName = date('YmdHis') . rand(1000, 9999);
+        }
 
         if (file_exists($class)) {
             include_once $class;
@@ -771,83 +811,50 @@ class chan {
             $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
             $writer->save('php://output');
         } else {
-            echo 'class is not exist';
+            die('Excel class is not exist');
         }
     }
 
     /**
-     * 轉換跳脫字元
+     * Convert escapte string
+     *
+     * @param string $string string need to be convert
+     * @return string
      */
-    function convertEscape($str) {
-        return str_replace('/', '\/', str_replace('"', '\"', $str));
+    function convertEscape($string) {
+        return str_replace('/', '\/', str_replace('"', '\"', $string));
     }
     
     /**
-     * 將內文轉為列表
-     * $val - 內文
+     * Required variable check
+     *
+     * @param array $variables required variables
+     * @param string $url redirect url
      */
-    function br2li($val) {
-        echo '<li>';
-        echo str_replace('<br>', '</li><li>', nl2br($val));
-        echo '</li>';
-    }
-    
-    /**
-     * 檢查需求的參數
-     * $arr - 將參數使用陣列傳入
-     * $url - 網址
-     */
-    function reqVariable($arr, $url = 'index.php') {
-        foreach ($arr as $k => $v) {
-            if (!isset($_GET[$v]) || empty($_GET[$v])) {
-                $this->jsRedirect('請由正常管道進入', $url);
+    function reqVariable($variables = array(), $url = 'index.php') {
+        foreach ($variables as $variable) {
+            if (!isset($_GET[$variable]) || empty($_GET[$variable])) {
+                $this->jsRedirect($this->_langUrlError, $url);
             }
         }
     }
     
     /**
-     * 返回是否確認
-     * $com1 - 比較字串1
-     * $com2 - 比較字串2
+     * Temporary cookie id
+     *
+     * @param integer $day cookie exist day
      */
-    function isChecked($com1 = '', $com2 = '') {
-        $com1 = (string)$com1;
-        $com2 = (string)$com2;
-        if ($com1 == '' || $com2 == '') {
-            return '';
-        } else {
-            return !strcmp($com1, $com2) ? 'checked="checked"' : '';
+    function tempCookieId($day = 7) {
+        $time = time() + 3600 * 24 * $day;
+
+        if (!isset($_COOKIE['tempId'])) {
+            setcookie('tempId', uniqid() . rand(10000, 99999), $time);
         }
-    }
-    
-    /**
-     * 返回是否選擇
-     * $com1 - 比較字串1
-     * $com2 - 比較字串2
-     */
-    function isSelected($com1 = '', $com2 = '') {
-        $com1 = (string)$com1;
-        $com2 = (string)$com2;
-        if ($com1 == '' || $com2 == '') {
-            return '';
-        } else {
-            return !strcmp($com1, $com2) ? 'selected="selected"' : '';
-        }
-    }
-    
-    /**
-     * 生成一個暫用的 cookie id
-     */
-    function tempCookieId($day = '') {
-        if ($day == '') {
-            $day = 7; // 預設7天
-        }
-        $time = time()+3600*24*$day;
-        if (!isset($_COOKIE['tempId'])) setcookie('tempId', uniqid().rand(10000,99999), $time);
     }
     
     /**
      * DateDiff
+     *
      * $interval can be:
      * yyyy - Number of full years
      * q - Number of full quarters
@@ -952,27 +959,26 @@ class chan {
     }
     
     /**
-     * 建立目錄
+     * Build directory
+     *
+     * @param string $directory directory name
      */
-    function makeDir($dir) {
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777);
+    function makeDir($directory) {
+        if (!is_dir($directory)) {
+            mkdir($directory, 0777);
         }
     }
     
     /**
-     * Email寄送功能
-     * $fromEmail - 寄件者Email
-     * $fromName - 寄件者title
-     * $receiverEmail - 收件者Email
-     * $subject - 標題
-     * $content - 內容
+     * Send email
      */
     function email() {
-        $class = dirname(__FILE__).'/class.phpmailer.php';
-        if (!file_exists($class)) return 'class is not exist';
+        $class = dirname(__FILE__) . '/class.phpmailer.php';
+        if (!file_exists($class)) {
+            return 'Email class is not exist';
+        }
 
-        require_once($class);
+        include_once($class);
         $mail = new PHPMailer();
         $mail->CharSet = "UTF-8";
         $mail->Encoding = "base64";
@@ -982,6 +988,7 @@ class chan {
         $mail->Subject = $this->emailSubject;
         $mail->Body = $this->emailContent;
         $mail->AddAddress($this->emailTo);
+
         if (!$mail->Send() && $this->emailDebug) {
             return $mail->ErrorInfo;
         } else {
@@ -990,42 +997,54 @@ class chan {
     }
     
     /**
-     * 擷取日期部份
+     * Cut date part
+     *
+     * @param string $date date string
+     * @return string
      */
     function dateOnly($date) {
         return date('Y-m-d', strtotime($date));
     }
 
     /**
-     * 截斷字
-     * $f - 字串
-     * $l - 長度
-     * $symbol - 替代符號
+     * Cut string
+     *
+     * @param string $string string
+     * @param integer $length string length
+     * @param string $symbol replace string
      */
-    function cutStr($f, $l, $symbol = '') {
+    function cutStr($string, $length, $symbol = '...') {
         mb_internal_encoding($this->charset);
-        $f = trim(strip_tags($f));
-        if (mb_strlen($f) > $l) {
-            return mb_substr($f, 0, $l).$symbol;
+        $string = trim(strip_tags($string));
+
+        if (mb_strlen($string) > $length) {
+            return mb_substr($string, 0, $length) . $symbol;
         } else {
-            return $f;
+            return $string;
         }
     }
 
     /**
-     * 傳回指定的資料
+     * Get data with definded fields
+     *
+     * @param array $fields fields
+     * @param string $where where condition
+     * @return data
      */
     function retData($fields = array(), $where = '') {
         $fields = implode(', ', preg_replace('/^(.*?)$/', "`$1`", $fields));
         $sql = sprintf("SELECT %s FROM %s WHERE %s",
             $fields,
-            '`'.$this->table.'`',
+            '`' . $this->table . '`',
             $where);
+
         return $this->myOneRow($sql);
     }
 
     /**
-     * 今天日期
+     * Now
+     *
+     * @return string
      */
     function retNow() {
         return date('Y-m-d H:i:s');
@@ -1033,18 +1052,22 @@ class chan {
 
     /**
      * IP
+     *
+     * @return string
      */
     function retIp() {
         return $_SERVER['REMOTE_ADDR'];
     }
     
     /**
-     * 目前網址
-     * $url - 連結檔名
+     * Current Uri
+     *
+     * @param string $url combine url if assigned
+     * @return string
      */
-    function retUri($url = '') {
-        if ($url == '') {
-            return 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+    function retUri($url = NULL) {
+        if (NULL === $url) {
+            return 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         } else {
             return 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . $url;
         }
@@ -1052,106 +1075,114 @@ class chan {
     }
     
     /**
-     * 抓取最大排序
-     * $sort - 欄位名稱
-     * $where - WHERE 條件
+     * Get max sort
+     *
+     * @param string $sort field name
+     * @param string $where where condition 
+     * @return integer
      */
     function retMaxSort($sort, $where = '1 = 1') {
-        $sql = sprintf("SELECT MAX(%s) as sortMax FROM %s WHERE %s",
-            '`'.$sort.'`',
+        $sql = sprintf("SELECT MAX(%s) as `maxSort` FROM %s WHERE %s",
+            '`' . $sort . '`',
             $this->table,
             $where);
         $row = $this->myOneRow($sql);
-        return (!$row) ? 1 : $row['sortMax']+1;
+        return (NULL === $row) ? 1 : intval($row['maxSort'] + 1);
     }
-	
+    
     /**
-     * 將資料轉成 smarty option 的格式
+     * Convert data to smarty option format
      * $data - 資料
      * $value - 值
      * $text - 名稱
      * $name - 第一項標題
      */
-    function retSmartyOption($data, $value, $text, $name = '請選擇') {
-        $arr = array();
+    function retSmartyOption($data = NULL, $value, $text, $select = NULL) {
+        $result = array();
 
-        if ($data) {
-            $arr[''] = $name;
+        if (NULL !== $data) {
+            if (NULL === $select) {
+                $select = $this->_langSelect;
+            }
+
+            $result[''] = $select;
+
             foreach ($data as $v) {
-                $arr[$v[$value]] = $v[$text];
+                $result[$v[$value]] = $v[$text];
             }
         }
 
-        return $arr;
+        return $result;
     }
     
     /**
-     * 秀出錯誤訊息
-     * $msg - 訊息內容
+     * Show message
+     *
+     * @param string $message message to be show
      */
-    function showMsg($msg = '') {
-        return '<div style="border: 1px solid orange; text-align: center; background: #E1FDE3; padding: 4px; font-size: 14px; margin: 2px;">'.$msg.'</div>';
+    function showMsg($message = NULL) {
+        if (NULL !== $message) {
+            echo '<div style="border: 1px solid orange; text-align: center; background: #E1FDE3; padding: 4px; font-size: 14px; margin: 2px;">' . $message . '</div>';
+        }
     }
 
-    /////////////////////////////////////////////////
-    // 檔案處理
-    /////////////////////////////////////////////////
-
     /**
-     * 檔案上傳
-     * $path - 上傳路徑
-     * $file - 檔案
+     * File upload
+     *
+     * @param string $path path
+     * @param string $file file name
+     * @return array
      **/
-    function fileUpload($path = '', $file = '') {
-        $class = dirname(__FILE__).'/class.upload.php'; // class路徑
-        $langFile = dirname(__FILE__).'/lang/class.upload.zh_TW.php'; // 繁中語言包
-        $lang = (file_exists($langFile)) ? 'zh_TW' : '';
-        $err ='';
+    function fileUpload($path = '/', $file = '') {
+        $class = dirname(__FILE__) . '/class.upload.php';
+        $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
+        $lang = file_exists($langFile) ? 'zh_TW' : '';
+        $error ='';
         $imgName = '';
 
         if (!file_exists($class)) {
-            $err = 'class is not exist'; // 檢查class是否存在
+            $error = 'Upload class is not exist';
         } else {
             include_once $class;
-            $fileName = date('YmdHis').rand(1000, 9999);
+            $fileName = date('YmdHis') . rand(1000, 9999);
             $handle = new upload($_FILES[$file], $lang);
             $handle->file_new_name_body = $fileName;
             $handle->file_max_size = $this->fileUploadSize;
             $handle->process($path);
 
-            if (!$handle->processed) $err = $handle->error;
+            if (!$handle->processed) {
+                $error = $handle->error;
+            }
         }
 
         return array(
-            'err'=> $err, // 錯誤訊息
-            'file'=> $handle->file_dst_name, // 新檔名
-            'extension' => $handle->file_src_name_ext, // 副檔名
-            'originName' => $handle->file_src_name, // 舊檔名
-            'path' => $path // 路徑
+            'err'        => $error,
+            'file'       => $handle->file_dst_name,
+            'extension'  => $handle->file_src_name_ext,
+            'originName' => $handle->file_src_name,
+            'path'       => $path
         );
     }
-
-    /////////////////////////////////////////////////
-    // 圖片處理
-    /////////////////////////////////////////////////
     
     /**
-     * 圖片上傳
-     * $path - 上傳路徑
-     * $img - 檔案
+     * Image Upload
+     *
+     * @param string $path path
+     * @param string $file file name
+     * @return array
      **/
-    function imgUpload($path = '', $img = '') {
-        $class = dirname(__FILE__).'/class.upload.php'; // class路徑
-        $langFile = dirname(__FILE__).'/lang/class.upload.zh_TW.php'; // 繁中語言包
-        $lang = (file_exists($langFile)) ? 'zh_TW' : '';
-        $err ='';
+    function imageUpload($path = '/', $img = '') {
+        $class = dirname(__FILE__) . '/class.upload.php';
+        $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
+        $lang = file_exists($langFile) ? 'zh_TW' : '';
+        $error ='';
         $imgName = '';
 
         if (!file_exists($class)) {
-            $err = 'class is not exist'; // 檢查class是否存在
+            $error = 'Upload class is not exist';
         } else {
             include_once $class;
-            $imgName = date('YmdHis').rand(1000, 9999);
+            $imgName = date('YmdHis') . rand(1000, 9999);
             $handle = new upload($_FILES[$img], $lang);
             $handle->file_new_name_body = $imgName;
             $handle->file_max_size = $this->imageUploadSize;
@@ -1164,74 +1195,59 @@ class chan {
             $handle->image_ratio_no_zoom_in = true;
             $handle->process($path);
 
-            if (!$handle->processed) $err = $handle->error;
+            if (!$handle->processed) {
+                $error = $handle->error;
+            }
         }
 
         return array(
-            'err'=> $err, // 錯誤訊息
-            'img'=> $handle->file_dst_name, // 圖片名稱
-            'originName' => $handle->file_src_name, // 舊檔名
-            'path' => $path // 路徑
+            'err'        => $error,
+            'img'        => $handle->file_dst_name,
+            'originName' => $handle->file_src_name,
+            'path'       => $path
         );
     }
 
     /**
-     * 建立驗證碼圖片
+     * Make fit thumbnail
+     *
+     * @param string $dir directory
+     * @param string $img image name
+     * @param integer $width image width
+     * @param integer $height image height
+     * @param string $noFile message when file not exiest
+     * @param string $nameOnly return string when true
+     * @return mixed
      */
-    function createCaptcha() {
-        $this->sessionOn();
-        $imgPath = 'images/captcha/'; // 圖片路徑
-        $rand = rand(1000, 9999); // 亂數
-        $_SESSION['captcha'] = $rand;
-        
-        $p1 = imagecreatefromgif($this->captchaSource.substr($rand, 0, 1).'.gif');
-        $p2 = imagecreatefromgif($this->captchaSource.substr($rand, 1, 1).'.gif');
-        $p3 = imagecreatefromgif($this->captchaSource.substr($rand, 2, 1).'.gif');
-        $p4 = imagecreatefromgif($this->captchaSource.substr($rand, 3, 1).'.gif');
-        $im = imagecreatetruecolor(100, 30);
-        
-        imagecopymerge($im, $p1, 0, 0, 0, 0, 25, 30, 100);
-        imagecopymerge($im, $p2, 25, 0, 0, 0, 25, 30, 100);
-        imagecopymerge($im, $p3, 50, 0, 0, 0, 25, 30, 100);
-        imagecopymerge($im, $p4, 75, 0, 0, 0, 25, 30, 100);
-        
-        imagepng($im);
-        
-        imagedestroy($p1);
-        imagedestroy($p2);
-        imagedestroy($p3);
-        imagedestroy($p4);
-        imagedestroy($im);
-    }
-
-    /**
-     * 利用 class.upload.php 符合視窗
-     * $dir - 目錄
-     * $img - 圖片名稱
-     * $ratio - 比例
-     * $noFile - 不存在時的回應
-     */
-    function fitThumb($dir, $img, $w = 0, $h = 0, $noFile = '檔案不存在', $nameOnly = false) {
+    function fitThumb($dir, $img, $width = 0, $height = 0, $noFile = '', $nameOnly = false) {
         $dir = str_replace(' ', '' , $dir);
-        $thumbDir = $dir.'thumbnails/'; // 縮圖路徑
-        $class = dirname(__FILE__).'/class.upload.php'; // class路徑
+        $thumbDir = $dir . 'thumbnails/';
+        $class = dirname(__FILE__) . '/class.upload.php';
+        $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
+        $lang = file_exists($langFile) ? 'zh_TW' : '';
         $body = pathinfo($img, PATHINFO_FILENAME);
         $ext = pathinfo($img, PATHINFO_EXTENSION);
-        
-        if (!file_exists($class)) return 'class is not exist'; // 檢查class是否存在
-        if (!file_exists($dir.$img) || $img == '') return $noFile; // 檢查原始圖片是否存在
-        
-        // 縮圖檔名
         $thumbBody = sprintf('%s_%sx%s_fit',
             $body,
-            $w,
-            $h);
+            $width,
+            $height);
+        $thumbName = $thumbDir . $thumbBody . '.' . $ext;
+        
 
-        $thumbName = $thumbDir.$thumbBody.'.'.$ext;
+        if ('' === $noFile) {
+            $noFile = $this->_langFileNotExist;
+        }
+        
+        if (!file_exists($class)) {
+            die('Image class is not exist');
+        }
+
+        if (!file_exists($dir . $img) || '' === $img) {
+            return $noFile;
+        }
         
         if (file_exists($thumbName)) {
-            // 如果縮圖存在直接秀出
-            if ($nameOnly) {
+            if (true === $nameOnly) {
                 return $thumbName;
             } else {
                 list($width, $height) = getimagesize($thumbName);
@@ -1241,24 +1257,23 @@ class chan {
                     $height);
             }
         } else {
-            // 處理縮圖
-            require_once($class);
-            $foo = new upload($dir.$img, 'zh_TW');
+            include_once($class);
+            $foo = new upload($dir . $img, $lang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
             $foo->image_resize = true;
             $foo->image_ratio_crop = 'T';
             
-            if ($w == 0 && $h != 0) {
-                $foo->image_y = $h;
+            if (0 === $width && 0 !== $height) {
+                $foo->image_y = $height;
                 $foo->image_ratio_x = true;
-            } elseif ($w != 0 && $h == 0) {
-                $foo->image_x = $w;
+            } elseif (0 !== $width && 0 === $height) {
+                $foo->image_x = $width;
                 $foo->image_ratio_y = true;
             } else {
-                $foo->image_x = $w;
-                $foo->image_y = $h;
+                $foo->image_x = $width;
+                $foo->image_y = $height;
                 $foo->image_ratio = true;
             }
             
@@ -1274,46 +1289,60 @@ class chan {
                         $foo->image_dst_y);
                 }
             } else {
-                if ($this->thumbDebug) return $foo->error;
+                if ($this->thumbDebug) {
+                    return $foo->error;
+                }
             }
         }
     }
     
     /**
-     * 利用 class.upload.php 作正方形縮圖
-     * $dir - 目錄
-     * $img - 圖片名稱
-     * $ratio - 比例
-     * $noFile - 不存在時的回應
+     * Make square thumbnail
+     *
+     * @param string $dir directory
+     * @param string $img image name
+     * @param integer $ratio image ratio
+     * @param string $noFile message when file not exiest
+     * @param string $nameOnly return string when true
+     * @return mixed
      */
-    function squareThumb($dir, $img, $ratio, $noFile = '檔案不存在', $nameOnly = false) {
+    function squareThumb($dir, $img, $ratio = 150, $noFile = '', $nameOnly = false) {
         $dir = str_replace(' ', '' , $dir);
-        $thumbDir = $dir.'thumbnails/'; // 縮圖路徑
-        $class = dirname(__FILE__).'/class.upload.php'; // class路徑
+        $thumbDir = $dir . 'thumbnails/';
+        $class = dirname(__FILE__) . '/class.upload.php';
+        $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
+        $lang = file_exists($langFile) ? 'zh_TW' : '';
         $body = pathinfo($img, PATHINFO_FILENAME);
         $ext = pathinfo($img, PATHINFO_EXTENSION);
-        
-        if (!file_exists($class)) return 'class is not exist'; // 檢查class是否存在
-        if (!file_exists($dir.$img) || $img == '') return $noFile; // 檢查原始圖片是否存在
-        
-        // 縮圖檔名
         $thumbBody = sprintf('%s_%s_square',
             $body,
             $ratio);
-            
-        $thumbName = $thumbDir.$thumbBody.'.'.$ext;
+        $thumbName = $thumbDir . $thumbBody . '.' . $ext;
+
+        if ('' === $noFile) {
+            $noFile = $this->_langFileNotExist;
+        }
+        
+        if (!file_exists($class)) {
+            die('Image class is not exist');
+        }
+
+        if (!file_exists($dir . $img) || '' === $img) {
+            return $noFile;
+        }
         
         if (file_exists($thumbName)) {
-            // 如果縮圖存在直接秀出
             if ($nameOnly) {
                 return $thumbName;
             } else {
-                return sprintf('<img src="%s">', $thumbName);
+                return sprintf('<img src="%s" width="%s" height="%s">',
+                    $thumbName,
+                    $ratio,
+                    $ratio);
             }
         } else {
-            // 處理縮圖
-            require_once($class);
-            $foo = new upload($dir.$img, 'zh_TW');
+            include_once($class);
+            $foo = new upload($dir . $img, $lang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
@@ -1321,51 +1350,65 @@ class chan {
             $foo->image_x = $ratio;
             $foo->image_y = $ratio;
             $foo->image_ratio_crop = 'T';
-            $foo->image_ratio = 'true';			
+            $foo->image_ratio = 'true';         
             $foo->process($thumbDir);
             
             if ($foo->processed) {
                 if ($nameOnly) {
                     return $thumbName;
                 } else {
-                    return sprintf('<img src="%s">', $thumbName);
+                    return sprintf('<img src="%s" width="%s" height="%s">',
+                        $thumbName,
+                        $ratio,
+                        $ratio);
                 }
             } else {
-                if ($this->thumbDebug) return $foo->error;
+                if ($this->thumbDebug) {
+                    return $foo->error;
+                }
             }
         }
     }
     
     /**
-     * 利用 class.upload.php 做縮圖
-     * $dir - 目錄
-     * $img - 圖片名稱
-     * $w - 寬度
-     * $h - 高度
-     * $noFile - 不存在時的回應
-     * $nameOnly - 只回傳名稱
+     * Make thubnail
+     *
+     * @param string $dir directory
+     * @param string $img image name
+     * @param integer $width image width
+     * @param integer $height image height
+     * @param string $noFile message when file not exiest
+     * @param string $nameOnly return string when true
+     * @return mixed
      */
-    function thumb($dir, $img, $w = 0, $h = 0, $noFile = '檔案不存在', $nameOnly = false) {
+    function thumb($dir, $img, $width = 0, $height = 0, $noFile = '', $nameOnly = false) {
         $dir = str_replace(' ', '' , $dir);
-        $thumbDir = $dir.'thumbnails/'; // 縮圖路徑
-        $class = dirname(__FILE__).'/class.upload.php'; // class路徑
+        $thumbDir = $dir . 'thumbnails/';
+        $class = dirname(__FILE__) . '/class.upload.php';
+        $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
+        $lang = file_exists($langFile) ? 'zh_TW' : '';
         $body = pathinfo($img, PATHINFO_FILENAME);
         $ext = pathinfo($img, PATHINFO_EXTENSION);
-        
-        if (!file_exists($class)) return 'class is not exist'; // 檢查class是否存在
-        if (!file_exists($dir.$img) || $img == '') return $noFile; // 檢查原始圖片是否存在
-        
-        // 縮圖檔名
         $thumbBody = sprintf('%s_%sx%s_thumb',
             $body,
-            $w,
-            $h);
+            $width,
+            $height);
+        $thumbName = $thumbDir . $thumbBody . '.' . $ext;
 
-        $thumbName = $thumbDir.$thumbBody.'.'.$ext;
+        if ('' === $noFile) {
+            $noFile = $this->_langFileNotExist;
+        }
+        
+        if (!file_exists($class)) {
+            die('Image class is not exist');
+        }
+
+        if (!file_exists($dir . $img) || '' === $img) {
+            return $noFile;
+        }
         
         if (file_exists($thumbName)) {
-            // 如果縮圖存在直接秀出
-            if ($nameOnly) {
+            if (true === $nameOnly) {
                 return $thumbName;
             } else {
                 list($width, $height) = getimagesize($thumbName);
@@ -1375,30 +1418,29 @@ class chan {
                     $height);
             }
         } else {
-            // 處理縮圖
-            require_once($class);
-            $foo = new upload($dir.$img, 'zh_TW');
+            include_once($class);
+            $foo = new upload($dir . $img, $lang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
             $foo->image_resize = true;
             
-            if ($w == 0 && $h != 0) {
-                $foo->image_y = $h;
+            if (0 === $width && 0 !== $height) {
+                $foo->image_y = $height;
                 $foo->image_ratio_x = true;
-            } elseif ($w != 0 && $h == 0) {
-                $foo->image_x = $w;
+            } elseif (0 !== $width && 0 === $height) {
+                $foo->image_x = $width;
                 $foo->image_ratio_y = true;
             } else {
-                $foo->image_x = $w;
-                $foo->image_y = $h;
+                $foo->image_x = $width;
+                $foo->image_y = $height;
                 $foo->image_ratio = true;
             }
             
             $foo->process($thumbDir);
             
             if ($foo->processed) {
-                if ($nameOnly) {
+                if (true === $nameOnly) {
                     return $thumbName;
                 } else {
                     return sprintf('<img src="%s" width="%s" height="%s">',
@@ -1407,251 +1449,25 @@ class chan {
                         $foo->image_dst_y);
                 }
             } else {
-                if ($this->thumbDebug) return $foo->error;
+                if ($this->thumbDebug) {
+                    return $foo->error;
+                }
             }
         }
     }
     
     /**
-     * 擷取正方縮圖
-     * $dir - 原始目錄
-     * $img - 圖片名稱
-     * $size - 最終的大小
-     */
-    function centerThumb($dir, $img, $size = 50, $noFile = '檔案不存在', $nameOnly = false) {
-        $this->makeDir($dir); // 檢查主資料夾
-        $thumbDir = $dir.'thumbnails/'; // 縮圖目錄
-        $this->makeDir($thumbDir); // 檢查縮圖資料夾
-        $realPosition = $dir.$img;
-        $ext = strtolower(end(explode('.', $realPosition))); // 副檔名
-        if (!file_exists($realPosition) || $img == '') return $noFile; // 檢查原始圖片是否存在
-
-        $thumbBody = sprintf('%s_%sx%s_center',
-            reset(explode('.', $img)),
-            $w,
-            $h);
-
-        $thumbName = $thumbDir.$thumbBody.'.jpg';
-        
-        if (file_exists($thumbName)) {
-            if ($nameOnly) {
-                return $thumbName;
-            } else {
-                return sprintf('<img src="%s">', $thumbName);
-            }
-        } else {
-            // 不存在則生成縮圖            
-            switch ($ext) {
-                case 'jpg':
-                case 'jpeg':
-                    $src = imagecreatefromjpeg($realPosition);
-                    break;
-                case 'gif':
-                    $src = imagecreatefromgif($realPosition);
-                    break;
-                case 'png':
-                    $src = imagecreatefrompng($realPosition);
-                    break;
-            }
-            
-            $srcW = imagesx($src); // 原始寬度
-            $srcH = imagesy($src); // 原始高度
-            
-            if ($srcW >= $srcH) {
-                // 以高來等比例縮第一次圖
-                $newW = intval($srcW / $srcH * $size); // 新寬度
-                $newH = $size; // 新高度
-            } else {
-                // 以寬來等比例縮第一次圖
-                $newW = $size; // 新寬度
-                $newH = intval($srcH / $srcW * $size); // 新高度
-            }
-            
-            // 縮第一次圖
-            $im = imagecreatetruecolor($newW, $newH);
-            imagealphablending($im, false); 
-            imagesavealpha($im, true); 
-            imagecopyresampled($im, $src, 0, 0, 0, 0, $newW, $newH, $srcW, $srcH);
-            
-            // 縮需求大小的圖
-            $im2 = imagecreatetruecolor($size, $size);
-            imagealphablending($im2, false); 
-            imagesavealpha($im2, true); 
-            $coordX = ($newW-$size)/2;
-            $coordY = ($newH-$size)/2;
-
-            imagecopyresampled($im2, $im, 0, 0, $coordX, $coordY, $newW, $newH, $newW, $newH);
-            
-             //輸出
-            switch ($ext) {
-                case 'jpg':
-                case 'jpeg':
-                    imagejpeg($im2, $thumbDir.$newName, 100);
-                    break;
-                case 'gif':
-                    imagegif($im2, $thumbDir.$newName, 100);
-                    break;
-                case 'png':
-                    imagepng($im2, $thumbDir.$newName);
-                    break;
-            }
-            
-            imagedestroy($im);
-            imagedestroy($im2);
-
-            return '<img src="'.$thumbDir.$newName.'" />';
-            return $noFile;
-        }
-    }
-    
-    /**
-     * 一般縮圖
-     * $dir - 原始目錄
-     * $file - 檔案名稱
-     * $reW - 寬
-     * $reH - 高
-     * $noFile - 檔案不存在的文案
-     */
-    function showThumbnail($dir, $file, $reW = 0, $reH = 0, $noFile = '檔案不存在') {
-        $realPosition = $dir.$file; // 圖片加路徑
-        $thumbDir = $dir.'thumbnails/'; // 縮圖目錄
-        
-        $this->makeDir($dir); // 檢查主資料夾
-        $this->makeDir($thumbDir); // 檢查縮圖資料夾
-
-        if (file_exists($realPosition) && $file != '') {
-            $fileName = current(explode('.', $file)); // 檔名
-            $ext = strtolower(end(explode('.', $realPosition))); // 副檔名
-            $newName = $fileName.'_'.$reW.'x'.$reH.'.'.$ext; //新檔名
-            
-            // 如果該縮圖存在則直接出圖
-            if (file_exists($thumbDir.$newName)) {
-                return '<img src="'.$thumbDir.$newName.'" />';
-            }
-            
-            // 不存在則生成縮圖            
-            switch ($ext) {
-                case 'jpg':
-                case 'jpeg':
-                    $src = imagecreatefromjpeg($realPosition);
-                    break;
-                case 'gif':
-                    $src = imagecreatefromgif($realPosition);
-                    break;
-                case 'png':
-                    $src = imagecreatefrompng($realPosition);
-                    break;
-            }
-            
-            $srcW = imagesx($src); // 原始寬度
-            $srcH = imagesy($src); // 原始高度
-            
-            if ($reH == 0) {
-                // 強制以寬等比例縮放
-                if ($srcW > $reW) {
-                    $newW = $reW;
-                    $newH = intval($srcH/$srcW*$reW);
-                } else {
-                    $newW = $srcW;
-                    $newH = $srcH;
-                }
-            } elseif ($reW == 0) {
-                // 強制以高等比例縮放
-                if ($srcH > $reH) {
-                    $newH = $reH;
-                    $newW = intval(($srcW/$srcH)*$reH);
-                } else {
-                    $newW = $srcW;
-                    $newH = $srcH;
-                }
-            } else {
-                // 偵測寬或高等比例縮放
-                if ($srcW > $srcH) {
-                    if ($srcW > $reW) {
-                        $newW = $reW;
-                        $newH = intval($srcH/$srcW*$reW);
-                     } else {
-                        $newW = $srcW;
-                        $newH = $srcH;
-                     }
-                } else {
-                    if ($srcH > $reH) {
-                        $newH = $reH;
-                        $newW = intval(($srcW/$srcH)*$reH);
-                    } else {
-                        $newW = $srcW;
-                        $newH = $srcH;
-                    }
-                }
-            }
-            
-            $im = imagecreatetruecolor($newW, $newH);
-            imagealphablending($im, false); 
-            imagesavealpha($im, true); 
-            imagecopyresampled($im, $src, 0, 0, 0, 0, $newW, $newH, $srcW, $srcH);
-            
-             //輸出
-            switch ($ext) {
-                case 'jpg':
-                case 'jpeg':
-                    imagejpeg($im, $thumbDir.$newName, 100);
-                    break;
-                case 'gif':
-                    imagegif($im, $thumbDir.$newName, 100);
-                    break;
-                case 'png':
-                    imagepng($im, $thumbDir.$newName);
-                    break;
-            }
-            
-            imagedestroy($im);
-            
-            return '<img src="'.$thumbDir.$newName.'" />';
-        } else {
-            return $noFile;
-        }
-    }	
-    
-    /**
-     * 登入區
-     */
-    function showLoginArea() {
-        $this->sessionOn();
-
-        if (isset($_SESSION['IS_LOGIN'])) {
-            return 'login_area';
-        } else {
-            // check login by cookis
-            if (isset($_COOKIE['loginName'])) {
-                $sqlMem = sprintf("SELECT * FROM tbl_account WHERE email = %s AND passwd = %s",
-                   $this->toSql($_COOKIE['loginName'], 'text'),
-                   $this->toSql($_COOKIE['loginPassword'], 'text'));
-                $rowMem = $this->myOneRow($sqlMem);
-
-                if ($rowMem) {
-                    $_SESSION['IS_LOGIN'] = "login_area";
-                    foreach ($rowMem as $k => $mem) {
-                        $_SESSION["member_".$k] = $mem;
-                    }
-
-                    return 'login_area';
-                } 
-            }
-            return 'notlogin';
-        }
-    }
-    
-    /**
-     * 隨機密碼
-     * randomPwd(10);
+     * Random password
+     *
+     * @param integer length
+     * @return string
      */
     function randomPwd($length = 8)
     {
-        $result = "";
+        $result = '';
         $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         
-        for ($p = 0; $p < $length; $p++)
-        {
+        for ($i = 0; $i < $length; $i++) {
             $result .= $chars[mt_rand(0, 35)];
         }
         

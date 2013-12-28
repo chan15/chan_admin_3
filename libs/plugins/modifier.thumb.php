@@ -11,8 +11,7 @@
  * @return string
  */
 function smarty_modifier_thumb($src, $path = '/', $width = 100, $height = 100, $noFile = '', $nameOnly = false) {
-	include_once dirname(dirname(dirname(__FILE__))) . '/libs/class.chan.php';
-	$chan = new chan;
+    global $chan;
 	return $chan->thumb($path, $src, $width, $height, $noFile, $nameOnly);
 }
 ?>

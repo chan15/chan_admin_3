@@ -8,9 +8,9 @@ if (isset($_POST['login'])) {
     $status = '';
     $message = '';
 
-    if ($username !='' && $password != '') {
-        $chan->dbConnect();
-        $sql = sprintf("SELECT * FROM `admin` WHERE `username` = %s AND `password` = %s",
+    if ('' !== $username && '' !== $password) {
+        $chan->connect();
+        $sql = sprintf("SELECT * FROM `admins` WHERE `username` = %s AND `password` = %s",
             $chan->toSql($username, 'text'),
             $chan->toSql($password, 'text'));
         $row = $chan->myOneRow($sql);
@@ -21,6 +21,7 @@ if (isset($_POST['login'])) {
         } else {
             $status = 'ok';
             $_SESSION['admin'] = true;
+            $_SESSION['adminId'] = $row['id'];
         }
     }
 

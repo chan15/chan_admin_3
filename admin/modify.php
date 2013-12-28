@@ -2,38 +2,44 @@
 include '../main.php';
 $loginAuth = 0;
 include 'login-policy.php';
-$pageItemName = ''; // nav name
-$subItemName = ''; // sidebar name
+$pageItemName = '';
+$subItemName = '';
+$tableName = '';
+$fileName = '';
 include 'nav.php';
 include 'options.php';
-$smarty->assign('yesNoOpt', $yesNoOpt);
-
-$theTable = 'tbl_test';
-$thePk = 't_id';
-$path = '../uploads/test/';
-$fileField = array('img');
-$fileRealField = array('t_img');
+$smarty->assign('yesNoOption', $yesNoOption);
+$path = '../uploads/' . $tableName . '/';
+$smarty->assign('path', $path);
+$fileField = array();
+$fileRealField = array();
 $haveUpload = false;
+$isUpdate = (isset($_POST['id'])) ? true : false;
 $chan->imageUploadRatio = 600;
-$chan->dbConnect();
+$chan->connect();
 
-// ajax add
-if (isset($_POST['add'])) {
+// Ajax modify
+if (isset($_POST['modify'])) {
 	$chan->checkSourceUrl();
-	$chan->table = $theTable; 
+	$chan->table = $tableName; 
 	$chan->addValidateField('名稱', 'name');
 	$chan->addValidateField('上架', 'on');
-	// $chan->addValidateField('產品編號', 'serial', 'duplicate', 'serial_number');
+
+    if (false === $isUpdate) {
+        $chan->addValidateField('圖片', 'image', 'file');
+    }
+
 	$chan->serverValidate();
 
-	if ($chan->validateErroror) {
+	if ($chan->validateError) {
 		echo $chan->validateMessage;
 	} else {
-		if ($haveUpload) {
+		if (true === $haveUpload) {
 			foreach ($fileField as $k => $field) {
-				if ($_FILES[$field]['name'] != '') {
-					$upload = $chan->imgUpload($path, $field);
-					if ($upload['err'] != '') {
+				if ('' !== $_FILES[$field]['name']) {
+					$upload = $chan->imageUpload($path, $field);
+
+					if ('' !== $upload['err']) {
 						echo $upload['err'];
 						exit;
 					} else {
@@ -43,57 +49,27 @@ if (isset($_POST['add'])) {
 			}
 		}
 
-		$chan->addField('t_name', $_POST['name']);
-		$chan->addField('t_on', $_POST['on']);
-        $chan->addField('t_sort', $chan->retMaxSort('t_sort'), 'int');
-        $chan->addField('t_build_time', $chan->retNow(), 'date');
+		$chan->addField('name', $_POST['name']);
+		$chan->addField('on', $_POST['on']);
         $chan->addField('admin_id', $_SESSION['adminId'], 'int');
 
-		if (!$chan->dataInsert()) {
-			echo $chan->sqlError;
-		}
-	}
 
-	exit;
-}
+        if (false === $isUpdate) {
+            $chan->addField('sort', $chan->retMaxSort('sort'), 'int');
+            $chan->addField('created_at', $chan->retNow(), 'date');
 
-// ajax update
-if (isset($_POST['update'])) {
-	$chan->checkSourceUrl();
-	$chan->table = $theTable;
-	$chan->pk = $thePk;
-	$chan->pkValue = $_POST['id'];
-	$chan->addValidateField('名稱', 'name');
-	$chan->addValidateField('上架', 'on');
-	$chan->serverValidate();
+            if (!$chan->dataInsert()) {
+                echo $chan->sqlError;
+            }
+        } else {
+            $chan->pk = 'id';
+            $chan->pkValue = $_POST['id'];
 
-	if ($chan->validateErroror) {
-		echo $chan->validateMessage;
-	} else {
-		if ($haveUpload) {
-			foreach ($fileField as $k => $field) {
-				if ($_FILES[$field]['name'] != '') {
-					$upload = $chan->imgUpload($path, $field);
-					if ($upload['err'] != '') {
-						echo $upload['err'];
-						exit;
-					} else {
-						$chan->addField($fileRealField[$k], $upload['img']);
-						$chan->fileDeleteArray[] = $chan->getFileName($fileRealField[$k]);
-					}
-				}
-			}
-		}
+            if (!$chan->dataUpdate()) {
+                echo $chan->sqlError;
+            }
+        }
 
-		$chan->addField('t_name', $_POST['name']);
-		$chan->addField('t_on', $_POST['on']);
-        $chan->addField('admin_id', $_SESSION['adminId'], 'int');
-
-		if (!$chan->dataUpdate()) {
-			echo $chan->sqlError;
-		} else {
-			$chan->dataFileDelete($path);
-		}
 	}
 
 	exit;
@@ -101,13 +77,11 @@ if (isset($_POST['update'])) {
 
 // load data
 if (isset($_GET['id'])) {
-	$sql = sprintf("SELECT * FROM %s WHERE %s = %s",
-		$theTable,
-		$thePk,
+	$sql = sprintf("SELECT * FROM `%s` WHERE `id` = %s",
+		$tableName,
 		$chan->toSql($_GET['id'], 'int'));
 	$row = $chan->myOneRow($sql);
 	$smarty->assign('data', $row);
 }
 
-$smarty->display('admin/test-modify.tpl');
-?>
+$smarty->display('admin/' . $fileName . '-modify.tpl');

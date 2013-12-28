@@ -1,19 +1,18 @@
 <?php
-$pageLimitOpt = array();
-$pageLimitOpt['20'] = 20;
-$pageLimitOpt['40'] = 40;
-$pageLimitOpt['60'] = 60;
+$pageLimitOption = array();
+$pageLimitOption['20'] = 20;
+$pageLimitOption['40'] = 40;
+$pageLimitOption['60'] = 60;
 
-$yesNoOpt = array();
-$yesNoOpt[1] = '是';
-$yesNoOpt[0] = '否';
+$yesNoOption = array();
+$yesNoOption[1] = '是';
+$yesNoOption[0] = '否';
 
-$yesNoListOpt = array();
-$yesNoListOpt[1] = '<a href="#" class="btn-yes">是</a>';
-$yesNoListOpt[0] = '<a href="#" class="btn-no">否</a>';
+$yesNoListOption = array();
+$yesNoListOption[1] = '<a href="#" class="btn-yes">是</a>';
+$yesNoListOption[0] = '<a href="#" class="btn-no">否</a>';
 
-$yesNoSearchOpt = array();
-$yesNoSearchOpt[''] = '請選擇';
-$yesNoSearchOpt[1] = '是';
-$yesNoSearchOpt[0] = '否';
-?>
+$yesNoSearchOption = array();
+$yesNoSearchOption[''] = '請選擇';
+$yesNoSearchOption[1] = '是';
+$yesNoSearchOption[0] = '否';

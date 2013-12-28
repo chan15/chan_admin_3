@@ -1,25 +1,25 @@
 $(function() {
-    var $form = $('#login-form');
+    var form = $('#login-form');
 
-    $form.find('input:first').focus();
+    form.find('input:first').focus();
 
     // form validation
-    $form.validate({
+    form.validate({
         rules: {
             username: 'required',
             password: 'required'
         },
         submitHandler: function(form) {
-            $admin.showModal();
+            admin.showModal();
 
-            var $val = {login: true, username: $('#username').val(), password: $('#password').val()};
-            $.post('index.php', $val, function($response) {
-                $admin.hideModal();
+            var val = {login: true, username: $('#username').val(), password: $('#password').val()};
+            $.post('index.php', val, function(response) {
+                admin.hideModal();
 
-                if ($response.status == 'ok') {
+                if ('ok' === response.status) {
                     window.location = 'admin.php';
                 } else {
-                    alert($response.message);
+                    alert(response.message);
                 }
 
             }, 'json');

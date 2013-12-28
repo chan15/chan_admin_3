@@ -1,25 +1,27 @@
 $(function() {
-	var $modifyForm = $('#modifyForm');
+	var modifyForm = $('#modifyForm');
 
-    // modify page tab function
+    // Modify page tab function
     $('#tab-zone a').on('click', function() {
         $(this).tab('show');
         return false;
     });
 
-    // initial ckeditor
-    $('.ckeditor').ckeditor();
-	
-    // prettyPhoto
+    // Initial ckeditor
+    $('.ckeditor').ckeditor({
+        customConfig: 'chan-config.js'
+    });
+
+    // PrettyPhoto
     $("a[rel^='prettyPhoto']").prettyPhoto({
         social_tools: false,
         deeplinking: false
     })
 
-	// focus on first element
-	$modifyForm.find('input:text:first').focus();
+	// Focus on first element
+	modifyForm.find('input:text:first').focus();
 
-	// add class rule
+	// Add class rule
 	$.validator.addClassRules("isNeed", {
 		required: true
 	})
@@ -32,28 +34,28 @@ $(function() {
 		number: true
 	})
 
-	// go back button
+	// Go back button
 	$('.btn-back').click(function() {
 		window.history.back();
 	});
 
-	// form validation
-	$modifyForm.validate({
+	// Form validation
+	modifyForm.validate({
 		errorElement: 'span',
 		errorClass: 'validation-error',
         errorPlacement: function(err, ele) {
             err.appendTo(ele.closest('div'));
         },
 		submitHandler: function(form) {
-            $admin.showModal();
+            admin.showModal();
 			$(form).ajaxSubmit({
 				iframe: true,
-				success: function($res) {
-					if ($res == '') {
+				success: function(response) {
+					if ('' === response) {
 						window.location = $('#back-page').val();
 					} else {
-                        $admin.hideModal();
-                        alert($admin.replaceBr($res));
+                        admin.hideModal();
+                        alert(admin.replaceBr(response));
 					}
 				}
 			});

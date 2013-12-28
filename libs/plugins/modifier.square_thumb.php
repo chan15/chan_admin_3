@@ -9,8 +9,7 @@
  * @return string
  */
 function smarty_modifier_square_thumb($src, $path = '/', $ratio = 100, $noFile = '', $nameOnly = false) {
-	include_once dirname(dirname(dirname(__FILE__))) . '/libs/class.chan.php';
-	$chan = new chan;
+    global $chan;
 	return $chan->squareThumb($path, $src, $ratio, $noFile, $nameOnly);
 }
 ?>

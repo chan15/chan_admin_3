@@ -2,7 +2,7 @@
 include '../main.php';
 include 'login-policy.php';
 $chan->checkSourceUrl();
-$chan->dbConnect();
+$chan->connect();
 
 $id = $_POST['id'];
 $tableField = $_POST['tableField'];
@@ -27,7 +27,7 @@ foreach ($idArr as $k) {
     // Delete detail data if needed
     switch ($tableField) {
         case 'table':
-            $sqlDetail = sprintf("SELECT id, image FROM detail_table WHERE fk = %s",
+            $sqlDetail = sprintf("SELECT `id`, `image` FROM `detail_table` WHERE `fk` = %s",
                 $chan->toSql($k, 'int'));
             $rowDetail = $chan->myRow($sqlDetail);
             if ($rowDetail) {

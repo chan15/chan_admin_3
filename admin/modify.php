@@ -53,7 +53,6 @@ if (isset($_POST['modify'])) {
 		$chan->addField('on', $_POST['on']);
         $chan->addField('admin_id', $_SESSION['adminId'], 'int');
 
-
         if (false === $isUpdate) {
             $chan->addField('sort', $chan->retMaxSort('sort'), 'int');
             $chan->addField('created_at', $chan->retNow(), 'date');

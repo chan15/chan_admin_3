@@ -14,7 +14,7 @@ $smarty->assign('path', $path);
 $fileField = array();
 $fileRealField = array();
 $haveUpload = false;
-$isUpdate = (isset($_POST['id'])) ? true : false;
+$isAdd = (isset($_POST['id'])) ? false : true;
 $chan->imageUploadRatio = 600;
 $chan->connect();
 
@@ -25,13 +25,13 @@ if (isset($_POST['modify'])) {
 	$chan->addValidateField('名稱', 'name');
 	$chan->addValidateField('上架', 'on');
 
-    if (false === $isUpdate) {
+    if (true === $isAdd) {
         $chan->addValidateField('圖片', 'image', 'file');
     }
 
 	$chan->serverValidate();
 
-	if ($chan->validateError) {
+	if (true === $chan->validateError) {
 		echo $chan->validateMessage;
 	} else {
 		if (true === $haveUpload) {
@@ -53,7 +53,7 @@ if (isset($_POST['modify'])) {
 		$chan->addField('on', $_POST['on']);
         $chan->addField('admin_id', $_SESSION['adminId'], 'int');
 
-        if (false === $isUpdate) {
+        if (true === $isAdd) {
             $chan->addField('sort', $chan->retMaxSort('sort'), 'int');
             $chan->addField('created_at', $chan->retNow(), 'date');
 

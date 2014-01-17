@@ -1,55 +1,55 @@
 <?php
 class chan {
     // Database variable
-    var $charset          = 'UTF-8';
-    var $host             = '';
-    var $db               = '';
-    var $username         = '';
-    var $password         = '';
-    var $conn             = '';
-    var $makeRecordCount  = true;
-    var $recordCount      = 0;
-    var $totalRecordCount = 0;
-    var $lastInsertId     = 0;
-    var $fieldArray       = array();
-    var $valueArray       = array();
-    var $sqlErrorMessage  = '';
-    var $table            = '';
-    var $pk               = '`id`';
-    var $pkValue          = '';
+    public $charset          = 'UTF-8';
+    public $host             = '';
+    public $db               = '';
+    public $username         = '';
+    public $password         = '';
+    public $conn             = '';
+    public $makeRecordCount  = true;
+    public $recordCount      = 0;
+    public $totalRecordCount = 0;
+    public $lastInsertId     = 0;
+    public $fieldArray       = array();
+    public $valueArray       = array();
+    public $sqlErrorMessage  = '';
+    public $table            = '';
+    public $pk               = '`id`';
+    public $pkValue          = '';
 
     // Email variable
-    var $emailDebug    = false;
-    var $emailFrom     = '';
-    var $emailTo       = '';
-    var $emailFromName = '';
-    var $emailSubject  = '';
-    var $emailContent  = '';
+    public $emailDebug    = false;
+    public $emailFrom     = '';
+    public $emailTo       = '';
+    public $emailFromName = '';
+    public $emailSubject  = '';
+    public $emailContent  = '';
 
     // Default variable
-    var $meta            = '<meta http-equiv = "Content-Type" content = "text/html; charset = utf-8" />';
-    var $thumbDebug      = false;
-    var $loginPage       = 'login.php';
-    var $fileDeleteArray = array();
+    public $meta            = '<meta http-equiv = "Content-Type" content = "text/html; charset = utf-8" />';
+    public $thumbDebug      = false;
+    public $loginPage       = 'login.php';
+    public $fileDeleteArray = array();
     
     // Server validate variable
-    var $captchaSource   = 'images/captcha/';
-    var $validateArray   = array();
-    var $validateMessage = '';
-    var $validateError   = false;
+    public $captchaSource   = 'images/captcha/';
+    public $validateArray   = array();
+    public $validateMessage = '';
+    public $validateError   = false;
     
     // Data variable
-    var $page       = 0;
-    var $totalPages = 0;
+    public $page       = 0;
+    public $totalPages = 0;
 
     // Image variable
-    var $imageUploadRatio   = 1000;
-    var $imageUploadAllowed = array('image/*');
-    var $imageUploadSize    = 2097152;
+    public $imageUploadRatio   = 1000;
+    public $imageUploadAllowed = array('image/*');
+    public $imageUploadSize    = 2097152;
 
     // File variable
-    var $fileUploadAllowed = array('image/*, application/*, archives/zip');
-    var $fileUploadSize    = 5242880;
+    public $fileUploadAllowed = array('image/*, application/*, archives/zip');
+    public $fileUploadSize    = 5242880;
 
     // Language variable
     private $_langPrevPage = '上一頁';
@@ -63,6 +63,13 @@ class chan {
     private $_langUrlError = '連結方式錯誤';
     private $_langSelect = '請選擇';
     private $_langFileNotExist = '檔案不存在';
+
+    public function __construct() {
+        $this->host = DB_HOST;
+        $this->db = DB_DB;
+        $this->username = DB_USERNAME;
+        $this->password = DB_PASSWORD;
+    }
     
     /**
      * Start Session
@@ -319,14 +326,14 @@ class chan {
                     case 'positive': $pattern = $positvePattern; break;
                     case 'boolean': $pattern = $booleanPattern; break;
                     case 'duplicate':
-                        if ('' === $this->pk) {
+                        if ('' === $this->pkValue) {
                             // Check if duplicate
-                            $sql = sprintf("SELECT * FROM %s WHERE %s = %s",
+                            $sql = sprintf("SELECT * FROM `%s` WHERE %s = %s",
                                 $this->table,
                                 $tableField,
                                 $this->toSql($value, 'text'));
                         } else {
-                            $sql = sprintf("SELECT * FROM %s WHERE %s = %s AND %s != %s",
+                            $sql = sprintf("SELECT * FROM `%s` WHERE `%s` = %s AND %s != %s",
                                 $this->table,
                                 $tableField,
                                 $this->toSql($value, 'text'),

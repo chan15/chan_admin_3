@@ -37,7 +37,7 @@ $(function() {
 
         admin.showModal();
 
-        $.post('ajax-change-online.php', {action: 1, tableField: tableField, id: $id}, function() {
+        $.post('ajax-change-online.php', {action: 1, tableField: tableField, id: id}, function() {
             admin.hideModal();
             temp.replaceWith(html);
         });
@@ -123,7 +123,7 @@ $(function() {
     $('#sort-serial').val(sortArray.join(','));
 
     // Sort function
-    if (undefined !== mainTable.find('tr:eq(1)').attr('sort')) {
+    if ('' !== mainTable.find('tr:eq(1)').attr('sort')) {
         var html = '<span class="btn btn-default btn-xs sort-move">↕</span>';
 
         $('.table tr').each(function() {

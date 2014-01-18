@@ -13,10 +13,10 @@ function smarty_modifier_phpthumb($file, $path,  $width = 0, $height = 0, $metho
     $extension = pathinfo($file, PATHINFO_EXTENSION);
     $quality = 100;
     $pathSplit = explode('/', str_replace('../', '', $path));
-    $pathAmount = count($pathSplit) - 1;
+    $pathAmount = count($pathSplit);
     $thumbPath = $path;
 
-    for ($i = 1; $i <= $pathAmount; $i++) {
+    for ($i = 1; $i < $pathAmount; $i++) {
         $thumbPath = dirname($thumbPath);
     }
 

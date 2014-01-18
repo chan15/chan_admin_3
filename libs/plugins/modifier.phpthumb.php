@@ -12,6 +12,8 @@
 function smarty_modifier_phpthumb($file, $path,  $width = 0, $height = 0, $method = 'thumb') {
     $extension = pathinfo($file, PATHINFO_EXTENSION);
     $quality = 100;
+    $thumbPath = dirname($path) . '/thumb/';
+    $path = '../' . str_replace('../', '', $path);
 
     if ('jpg' === $extension) {
         $extension = 'jpeg';
@@ -19,37 +21,41 @@ function smarty_modifier_phpthumb($file, $path,  $width = 0, $height = 0, $metho
 
     switch ($method) {
         case 'thumb':
-            return sprintf('thumb/phpThumb.php/f=%s;q=%s;%sx%s;%s',
+            return sprintf('%sphpThumb.php?src=%s&f=%s&q=%s&w=%s&h=%s',
+                $thumbPath ,
+                $path . $file,
                 $extension,
                 $quality,
                 $width,
-                $height,
-                $path . $file);
+                $height);
             break;
         case 'fit':
             if (0 === $width || 0 === $height) {
-                return sprintf('thumb/phpThumb.php/f=%s;q=%s;far=T;aoe=1;%sx%s;%s',
+                return sprintf('%sphpThumb.php?src=%s&f=%s&q=%s&far=T&aoe=1&w=%s&h=%s',
+                    $thumbPath,
+                    $path . $file,
                     $extension,
                     $quality,
                     $width,
-                    $height,
-                    $path . $file);
+                    $height);
             } else {
-                return sprintf('thumb/phpThumb.php/f=%s;q=%s;zc=T;aoe=1;%sx%s;%s',
+                return sprintf('%sphpThumb.php?src=%s&f=%s&q=%s&zc=T&aoe=1&w=%s&h=%s',
+                    $thumbPath,
+                    $path . $file,
                     $extension,
                     $quality,
                     $width,
-                    $height,
-                    $path . $file);
+                    $height);
             }
             break;
         case 'square':
-            return sprintf('thumb/phpThumb.php/f=%s;q=%s;zc=T;%sx%s;%s',
+            return sprintf('%sphpThumb.php?src=%s&f=%s&q=%s&zc=T&w=%s&h=%s',
+                $thumbPath,
+                $path . $file,
                 $extension,
                 $quality,
                 $width,
-                $height,
-                $path . $file);
+                $height);
             break;
     }
 }

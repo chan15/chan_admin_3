@@ -12,7 +12,15 @@
 function smarty_modifier_phpthumb($file, $path,  $width = 0, $height = 0, $method = 'thumb') {
     $extension = pathinfo($file, PATHINFO_EXTENSION);
     $quality = 100;
-    $thumbPath = dirname($path) . '/thumb/';
+    $pathSplit = explode('/', str_replace('../', '', $path));
+    $pathAmount = count($pathSplit) - 1;
+    $thumbPath = $path;
+
+    for ($i = 1; $i <= $pathAmount; $i++) {
+        $thumbPath = dirname($thumbPath);
+    }
+
+    $thumbPath .=  '/thumb/';
     $path = '../' . str_replace('../', '', $path);
 
     if ('jpg' === $extension) {

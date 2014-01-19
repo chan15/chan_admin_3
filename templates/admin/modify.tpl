@@ -29,7 +29,7 @@
                             <div class="col-md-3">
                                 <label>產品圖片</label>
                                 <div>
-                                    {if '' !== $data.image}
+                                    {if NULL !== $data.image}
                                     <img src="{$data.image|phpthumb:$path:100:100}">
                                     {/if}
                                 </div>

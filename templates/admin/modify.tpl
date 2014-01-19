@@ -1,8 +1,10 @@
-{extends file="admin/layout.tpl"}
-{block name="javascript"}
+{extends file='admin/layout.tpl'}
+
+{block name='javascript'}
 <script src="js/modify.js" type="text/javascript"></script>
 {/block}
-{block name="content"}
+
+{block name='content'}
 <div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -28,7 +30,7 @@
                                 <label>產品圖片</label>
                                 <div>
                                     {if '' !== $data.image}
-                                    {$data.image|thumb:$path:100:100:''}
+                                    <img src="{$data.image|phpthumb:$path:100:100}">
                                     {/if}
                                 </div>
                                 <input id="image" name="image" type="file">

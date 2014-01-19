@@ -50,7 +50,7 @@ if (isset($_POST['modify'])) {
 		}
 
 		$chan->addField('name', $_POST['name']);
-		$chan->addField('on', $_POST['on']);
+		$chan->addField('on', $_POST['on'], 'int');
         $chan->addField('admin_id', $_SESSION['adminId'], 'int');
 
         if (true === $isAdd) {

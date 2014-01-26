@@ -19,7 +19,7 @@ $name = (isset($_GET['name']) && '' !== $_GET['name']) ? '%' . $_GET['name'] . '
 $on = (isset($_GET['on']) && '' !== $_GET['on']) ? '%' . $_GET['on'] . '%' : '%%%';
 
 $sql = sprintf("SELECT *
-    FROM `%s` 
+    FROM `%s`
     WHERE `name` LIKE %s AND `on` LIKE %s
     ORDER BY `id` DESC",
     $tableName,

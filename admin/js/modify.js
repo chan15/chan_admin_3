@@ -9,7 +9,12 @@ $(function() {
 
     // Initial ckeditor
     $('.ckeditor').ckeditor({
-        customConfig: 'chan-config.js'
+        customConfig: '../js/chan-config.js'
+    });
+
+    // Datepicker
+    $('.date').datepicker({
+        dateFormat: 'yy-mm-dd'
     });
 
     // PrettyPhoto

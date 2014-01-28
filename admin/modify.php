@@ -21,7 +21,7 @@ $chan->connect();
 // Ajax modify
 if (isset($_POST['modify'])) {
 	$chan->checkSourceUrl();
-	$chan->table = $tableName; 
+	$chan->table = $tableName;
 	$chan->addValidateField('名稱', 'name');
 	$chan->addValidateField('上架', 'on');
 

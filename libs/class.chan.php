@@ -31,13 +31,13 @@ class chan {
     public $thumbDebug      = false;
     public $loginPage       = 'login.php';
     public $fileDeleteArray = array();
-    
+
     // Server validate variable
     public $captchaSource   = 'images/captcha/';
     public $validateArray   = array();
     public $validateMessage = '';
     public $validateError   = false;
-    
+
     // Data variable
     public $page       = 0;
     public $totalPages = 0;
@@ -70,14 +70,14 @@ class chan {
         $this->username = DB_USERNAME;
         $this->password = DB_PASSWORD;
     }
-    
+
     /**
      * Start Session
      */
     function sessionOn() {
         if (!isset($_SESSION)) session_start();
     }
-        
+
     /**
      * Execute sql
      * @param string $sql SQL statement
@@ -122,7 +122,7 @@ class chan {
       switch ($theType) {
         case "text":
           $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-          break;    
+          break;
         case "long":
         case "int":
           $theValue = ($theValue != "") ? intval($theValue) : "NULL";
@@ -140,7 +140,7 @@ class chan {
 
       return $theValue;
     }
-    
+
     /**
      * Table field
      * @param mixed $field filed
@@ -205,11 +205,11 @@ class chan {
             $this->table,
             implode(', ', $this->fieldArray),
             implode(', ', $this->valueArray));
-            
+
         $this->clearFields();
         return $this->sqlExecute($sqlIns);
     }
-    
+
     /**
      * Update data
      *
@@ -221,7 +221,7 @@ class chan {
         foreach ($this->fieldArray as $k => $v) {
             $sqlString[] = $v . ' = ' . $this->valueArray[$k];
         }
-        
+
         if (NULL === $where) {
             $where = sprintf("%s = %s",
                 $this->pk,
@@ -236,7 +236,7 @@ class chan {
         $this->clearFields();
         return $this->sqlExecute($sqlUpdate);
     }
-    
+
     /**
      * Delete data
      *
@@ -252,11 +252,11 @@ class chan {
         $sqlDel = sprintf("DELETE FROM %s WHERE %s",
             $this->table,
             $where);
-        
+
         $this->clearFields();
         return $this->sqlExecute($sqlDel);
     }
-    
+
     /**
      * Clear fields
      */
@@ -266,7 +266,7 @@ class chan {
         unset($this->fieldArray);
         unset($this->valueArray);
     }
-   
+
     /**
      * Check source url
      */
@@ -296,7 +296,7 @@ class chan {
                 'method'     => $method)
             );
     }
-    
+
     /**
      * Server validate
      *
@@ -307,7 +307,7 @@ class chan {
         $numberPattern = '/[0-9]/';
         $positvePattern = '/^\d+$/';
         $booleanPattern = '/^\d{0,1}+$/';
-        
+
         foreach ($this->validateArray as $v) {
             $value = ($v['type'] == 'file') ? @$_FILES[$v['field']]['name'] : (($v['method'] == 'POST') ? @$_POST[$v['field']] : @$_GET[$v['field']]);
             $name = $v['name'];
@@ -363,10 +363,10 @@ class chan {
                 }
             }
         }
-        
+
         return $this->validateError;
     }
-    
+
     /**
      * Show validate error message
      */
@@ -374,10 +374,10 @@ class chan {
         if (true === $this->validateError) {
             echo $this->meta;
             echo $this->validateMessage;
-            exit;            
+            exit;
         }
     }
-    
+
     /**
      * Get one data
      *
@@ -391,7 +391,7 @@ class chan {
         $num = mysql_num_rows($rec);
         $count = mysql_num_fields($rec);
         $result = array();
-        
+
         if ($num > 0) {
             $temp = array();
 
@@ -402,11 +402,11 @@ class chan {
         } else {
             $result = NULL;
         }
-        
+
         mysql_free_result($rec);
         return $result;
     }
-    
+
     /**
      * Get data
      *
@@ -424,7 +424,7 @@ class chan {
         }
 
         $count = mysql_num_fields($rec);
-        
+
         if ($this->recordCount > 0) {
             $result = array();
             $temp = array();
@@ -440,11 +440,11 @@ class chan {
         } else {
             $result = NULL;
         }
-        
+
         mysql_free_result($rec);
         return $result;
     }
-    
+
     /**
      * Get data by limit
      *
@@ -468,7 +468,7 @@ class chan {
         $row = $this->myRow($sqlPages);
         return $row;
     }
-   
+
     /**
      * Combine url param
      *
@@ -481,24 +481,24 @@ class chan {
         if (!empty($_SERVER['QUERY_STRING'])) {
             $params = explode('&', $_SERVER['QUERY_STRING']);
             $newParams = array(); 
-            
+
             foreach ($params as $param) {
                if (!stristr($param, $string)) {
                    array_push($newParams, $param);
                }
             }
-            
+
             if (0 !== count($newParams)) {
                 $result = '&' . htmlentities(implode('&', $newParams));
             }
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Default pager
-     * 
+     *
      * @param integer $limit data per page
      * @return string
      */
@@ -509,7 +509,7 @@ class chan {
         $result .= $this->pageNumber($limit) . $sep;
         $result .= $this->pageString('next', NULL, 'next') . $sep;
         return $result;
-    } 
+    }
 
     /**
      * Bootstrap pager
@@ -572,7 +572,7 @@ class chan {
 
         return $result;
     }
-    
+
     /**
      * Prev or nex page
      *
@@ -584,7 +584,7 @@ class chan {
     function pageString($method, $string = NULL, $class = '') {
         $currentPage = $_SERVER["PHP_SELF"];
         $result = '';
-        
+
         switch ($method) {
             case 'first':
                 if ($this->page > 0) {
@@ -592,8 +592,8 @@ class chan {
                         $string = $this->_langFirstPage;
                     }
                     $result = '<a href="' . sprintf("%s?page=%d%s",
-                        $currentPage, 
-                        0, 
+                        $currentPage,
+                        0,
                         $this->combineQueryString('page')) . '" class="' . $class . '">' . $string . '</a>';
                 }
 
@@ -604,8 +604,8 @@ class chan {
                         $string = $this->_langPrevPage;
                     }
                     $result = '<a href="' . sprintf("%s?page=%d%s",
-                        $currentPage, 
-                        max(0, $this->page - 1), 
+                        $currentPage,
+                        max(0, $this->page - 1),
                         $this->combineQueryString('page')) . '" class="' . $class . '">' . $string . '</a>';
                 }
 
@@ -617,8 +617,8 @@ class chan {
                     }
 
                     $result = '<a href="' . sprintf("%s?page=%d%s",
-                        $currentPage, 
-                        min($this->totalPages, $this->page + 1), 
+                        $currentPage,
+                        min($this->totalPages, $this->page + 1),
                         $this->combineQueryString('page')) . '" class="' . $class . '">' . $string . '</a>';
                 }
                 break;
@@ -635,10 +635,10 @@ class chan {
                 }
                 break;
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Page number
      *
@@ -673,10 +673,10 @@ class chan {
               $result .= $sep;
           }
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Logout
      *
@@ -685,7 +685,7 @@ class chan {
     function logout($url = 'index.php') {
         $this->sessionOn();
         session_destroy();
-        
+
         if (isset($_COOKIE)) {
             foreach ($_COOKIE as $name => $value) {
                 $name = htmlspecialchars($name);
@@ -695,7 +695,7 @@ class chan {
 
         $this->reUrl($url);
     }
-    
+
     /**
      * Save page to session as last visied page
      */
@@ -703,7 +703,7 @@ class chan {
         $this->sessionOn();
         $_SESSION['lastPage'] = $this->retUri();
     }
-    
+
     /**
      * Redirect
      *
@@ -712,10 +712,10 @@ class chan {
     function reUrl($url) {
         header(sprintf('Location: %s', $url));
     }
-    
+
     /**
      * Login level limitation
-     * 
+     *
      * @param array $level level (array(1, 2, ...))
      */
     function loginLevel($level = array()) {
@@ -726,7 +726,7 @@ class chan {
             $this->reUrl($this->loginPage);
         }
     }
-    
+
     /**
      * Not login check
      * only allow user who is not login
@@ -740,7 +740,7 @@ class chan {
             $this->reUrl($url);
         }
     }
-    
+
     /**
      * Login check
      * only allow user who is login
@@ -759,7 +759,7 @@ class chan {
             $this->reUrl($url);
         }
     }
-    
+
     /**
      * Redirect by JavaScript
      *
@@ -774,7 +774,7 @@ class chan {
         echo '</script>';
         exit;
     }
-    
+
     /**
      * Export data as excel
      *
@@ -831,21 +831,29 @@ class chan {
     function convertEscape($string) {
         return str_replace('/', '\/', str_replace('"', '\"', $string));
     }
-    
+
     /**
      * Required variable check
      *
      * @param array $variables required variables
      * @param string $url redirect url
      */
-    function reqVariable($variables = array(), $url = 'index.php') {
-        foreach ($variables as $variable) {
+    function reqVariable($variable = NULL, $url = 'index.php') {
+        if ('array' === gettype($variable)) {
+            foreach ($variables as $value) {
+                if (!isset($_GET[$value]) || empty($_GET[$value])) {
+                    $this->jsRedirect($this->_langUrlError, $url);
+                    break;
+                }
+            }
+        } else {
             if (!isset($_GET[$variable]) || empty($_GET[$variable])) {
                 $this->jsRedirect($this->_langUrlError, $url);
+                break;
             }
         }
     }
-    
+
     /**
      * Temporary cookie id
      *
@@ -858,7 +866,7 @@ class chan {
             setcookie('tempId', uniqid() . rand(10000, 99999), $time);
         }
     }
-    
+
     /**
      * DateDiff
      *
@@ -884,7 +892,7 @@ class chan {
         $difference = $dateto-$datefrom; // Difference in seconds
 
         switch($interval) {
-            case 'yyyy': // Number of full years    
+            case 'yyyy': // Number of full years
                 $years_difference = floor($difference / 31536000);
 
             if (mktime(date("H", $datefrom), date("i", $datefrom), date("s", $datefrom), date("n", $datefrom), date("j", $datefrom), date("Y", $datefrom)+$years_difference) > $dateto) {
@@ -898,7 +906,7 @@ class chan {
             $datediff = $years_difference;
             break;
 
-        case "q": // Number of full quarters    
+        case "q": // Number of full quarters
             $quarters_difference = floor($difference / 8035200);
 
             while (mktime(date("H", $datefrom), date("i", $datefrom), date("s", $datefrom), date("n", $datefrom)+($quarters_difference*3), date("j", $dateto), date("Y", $datefrom)) < $dateto) {
@@ -928,7 +936,7 @@ class chan {
             $datediff = floor($difference / 86400);
             break;
 
-        case "w": // Number of full weekdays   
+        case "w": // Number of full weekdays
             $days_difference = floor($difference / 86400);
             $weeks_difference = floor($days_difference / 7); // Complete weeks
             $first_day = date("w", $datefrom);
@@ -948,13 +956,13 @@ class chan {
 
         case "ww": // Number of full weeks
             $datediff = floor($difference / 604800);
-            break;   
+            break;
 
         case "h": // Number of full hours
             $datediff = floor($difference / 3600);
             break;
 
-        case "n": // Number of full minutes   
+        case "n": // Number of full minutes
             $datediff = floor($difference / 60);
             break;
 
@@ -964,7 +972,7 @@ class chan {
         }
             return $datediff;
     }
-    
+
     /**
      * Build directory
      *
@@ -975,7 +983,7 @@ class chan {
             mkdir($directory, 0777);
         }
     }
-    
+
     /**
      * Send email
      */
@@ -1002,7 +1010,7 @@ class chan {
             return true;
         }
     }
-    
+
     /**
      * Cut date part
      *
@@ -1065,7 +1073,7 @@ class chan {
     function retIp() {
         return $_SERVER['REMOTE_ADDR'];
     }
-    
+
     /**
      * Current Uri
      *
@@ -1078,14 +1086,14 @@ class chan {
         } else {
             return 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . $url;
         }
-        
+
     }
-    
+
     /**
      * Get max sort
      *
      * @param string $sort field name
-     * @param string $where where condition 
+     * @param string $where where condition
      * @return integer
      */
     function retMaxSort($sort, $where = '1 = 1') {
@@ -1096,7 +1104,7 @@ class chan {
         $row = $this->myOneRow($sql);
         return (NULL === $row) ? 1 : intval($row['maxSort'] + 1);
     }
-    
+
     /**
      * Convert data to smarty option format
      * $data - 資料
@@ -1121,7 +1129,7 @@ class chan {
 
         return $result;
     }
-    
+
     /**
      * Show message
      *
@@ -1170,7 +1178,7 @@ class chan {
             'path'       => $path
         );
     }
-    
+
     /**
      * Image Upload
      *
@@ -1196,7 +1204,7 @@ class chan {
             $handle->allowed = $this->imageUploadAllowed;
             $handle->jpeg_quality = 100;
             $handle->image_resize = true;
-            $handle->image_x = $this->imageUploadRatio; 
+            $handle->image_x = $this->imageUploadRatio;
             $handle->image_y = $this->imageUploadRatio;
             $handle->image_ratio = true;
             $handle->image_ratio_no_zoom_in = true;
@@ -1239,12 +1247,11 @@ class chan {
             $width,
             $height);
         $thumbName = $thumbDir . $thumbBody . '.' . $ext;
-        
 
         if ('' === $noFile) {
             $noFile = $this->_langFileNotExist;
         }
-        
+
         if (!file_exists($class)) {
             die('Image class is not exist');
         }
@@ -1252,7 +1259,7 @@ class chan {
         if (!file_exists($dir . $img) || '' === $img) {
             return $noFile;
         }
-        
+
         if (file_exists($thumbName)) {
             if (true === $nameOnly) {
                 return $thumbName;
@@ -1271,7 +1278,7 @@ class chan {
             $foo->jpeg_quality = 100;
             $foo->image_resize = true;
             $foo->image_ratio_crop = 'T';
-            
+
             if (0 === $width && 0 !== $height) {
                 $foo->image_y = $height;
                 $foo->image_ratio_x = true;
@@ -1283,9 +1290,9 @@ class chan {
                 $foo->image_y = $height;
                 $foo->image_ratio = true;
             }
-            
+
             $foo->process($thumbDir);
-            
+
             if ($foo->processed) {
                 if ($nameOnly) {
                     return $thumbName;
@@ -1302,7 +1309,7 @@ class chan {
             }
         }
     }
-    
+
     /**
      * Make square thumbnail
      *
@@ -1329,7 +1336,7 @@ class chan {
         if ('' === $noFile) {
             $noFile = $this->_langFileNotExist;
         }
-        
+
         if (!file_exists($class)) {
             die('Image class is not exist');
         }
@@ -1337,7 +1344,7 @@ class chan {
         if (!file_exists($dir . $img) || '' === $img) {
             return $noFile;
         }
-        
+
         if (file_exists($thumbName)) {
             if ($nameOnly) {
                 return $thumbName;
@@ -1357,9 +1364,9 @@ class chan {
             $foo->image_x = $ratio;
             $foo->image_y = $ratio;
             $foo->image_ratio_crop = 'T';
-            $foo->image_ratio = 'true';         
+            $foo->image_ratio = 'true';
             $foo->process($thumbDir);
-            
+
             if ($foo->processed) {
                 if ($nameOnly) {
                     return $thumbName;
@@ -1376,7 +1383,7 @@ class chan {
             }
         }
     }
-    
+
     /**
      * Make thubnail
      *
@@ -1405,7 +1412,7 @@ class chan {
         if ('' === $noFile) {
             $noFile = $this->_langFileNotExist;
         }
-        
+
         if (!file_exists($class)) {
             die('Image class is not exist');
         }
@@ -1413,7 +1420,7 @@ class chan {
         if (!file_exists($dir . $img) || '' === $img) {
             return $noFile;
         }
-        
+
         if (file_exists($thumbName)) {
             if (true === $nameOnly) {
                 return $thumbName;
@@ -1431,7 +1438,7 @@ class chan {
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
             $foo->image_resize = true;
-            
+
             if (0 === $width && 0 !== $height) {
                 $foo->image_y = $height;
                 $foo->image_ratio_x = true;
@@ -1443,9 +1450,9 @@ class chan {
                 $foo->image_y = $height;
                 $foo->image_ratio = true;
             }
-            
+
             $foo->process($thumbDir);
-            
+
             if ($foo->processed) {
                 if (true === $nameOnly) {
                     return $thumbName;
@@ -1462,7 +1469,7 @@ class chan {
             }
         }
     }
-    
+
     /**
      * Random password
      *
@@ -1473,12 +1480,11 @@ class chan {
     {
         $result = '';
         $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        
+
         for ($i = 0; $i < $length; $i++) {
             $result .= $chars[mt_rand(0, 35)];
         }
-        
+
         return $result;
     }
 }
-?>

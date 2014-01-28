@@ -57,14 +57,14 @@ if (isset($_POST['modify'])) {
             $chan->addField('sort', $chan->retMaxSort('sort'), 'int');
             $chan->addField('created_at', $chan->retNow(), 'date');
 
-            if (!$chan->dataInsert()) {
+            if (false === $chan->dataInsert()) {
                 echo $chan->sqlError;
             }
         } else {
             $chan->pk = 'id';
             $chan->pkValue = $_POST['id'];
 
-            if (!$chan->dataUpdate()) {
+            if (false === $chan->dataUpdate()) {
                 echo $chan->sqlError;
             }
         }

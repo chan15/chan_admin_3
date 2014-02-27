@@ -69,6 +69,7 @@ class chan {
     private $_column = '';
     private $_columnName = '';
     private $_indexes = array();
+    public $migrated = true;
     public $timestamp = false;
     public $engine = 'innoDB';
 
@@ -1852,14 +1853,18 @@ class chan {
             $result .= ') ENGINE=' . $this->engine . ' CHARACTER SET utf8 COLLATE = utf8_unicode_ci;';
 
             if (true === $this->sqlExecute($result)) {
+                $this->migrated = true;
                 echo $this->table . " created<br>";
             } else {
+                $this->migrated = false;
                 echo $this->table . " error<br>";
             }
         } else {
             if (true === $this->sqlExecute($sql)) {
+                $this->migrated = true;
                 echo "sql finished<br>";
             } else {
+                $this->migrated = false;
                 echo "sql error<br>";
             }
         }

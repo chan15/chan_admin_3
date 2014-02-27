@@ -12,7 +12,10 @@ if (NULL === $chan->checkMigrations($name)) {
     $chan->boolean('on');
     $chan->timestamp = true;
     $chan->migrate();
-    saveToMigarations($name);
+
+    if (true === $chan->migrated) {
+        saveToMigarations($name);
+    }
 }
 
 $name = 'insert_admin_default';
@@ -23,7 +26,10 @@ if (NULL === $chan->checkMigrations($name)) {
     $chan->addField('on', 1, 'int');
     $chan->addField('created_at', $chan->retNow(), 'date');
     $chan->save();
-    saveToMigarations($name);
+
+    if (true === $chan->migrated) {
+        saveToMigarations($name);
+    }
 }
 
 echo 'finished';

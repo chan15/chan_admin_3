@@ -1576,6 +1576,7 @@ class chan {
      */
     public function integer($name, $length = '') {
         $this->_fieldName = $name;
+
         if (0 === intval($length)) {
             $this->_fields[$name] = sprintf("`%s` INT UNSIGNED NOT NULL",
                 $name);
@@ -1596,6 +1597,7 @@ class chan {
      */
     public function tinyint($name, $length = '') {
         $this->_fieldName = $name;
+
         if (0 === intval($length)) {
             $this->_fields[$name] = sprintf("`%s` TINYINT UNSIGNED NOT NULL",
                 $name);

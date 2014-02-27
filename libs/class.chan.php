@@ -1786,10 +1786,20 @@ class chan {
      * @param string name column name
      */
     public function dropColumn($name) {
-        $sql = sprintf("ALTER TABLE `%s` DROP `%s`",
+        $this->_column = sprintf("ALTER TABLE `%s` DROP `%s`",
             $this->table,
             $name);
-        $this->migrate($sql);
+    }
+
+    /**
+     * Index column
+     *
+     * @param string name column name
+     */
+    public function indexColumn($name) {
+        $this->_column = sprintf("ALTER TABLE `%s` ADD INDEX(`%s`)",
+            $this->table,
+            $name);
     }
 
     /**
@@ -1806,7 +1816,7 @@ class chan {
     }
 
     /**
-     * Add column
+     * Change column
      *
      * @param string name column name
      */

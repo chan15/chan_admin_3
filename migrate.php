@@ -12,6 +12,8 @@ if (false === $result) {
     $chan->sqlExecute($sql);
 }
 
+$tableName = '';
+
 // Start reading file and check
 if ($handle = opendir($path)) {
     while (false !== ($entry = readdir($handle))) {
@@ -23,6 +25,7 @@ if ($handle = opendir($path)) {
             if (NULL === $row) {
                 $sql = file_get_contents($path . $entry);
                 $chan->sqlExecute($sql);
+                $tableName .= $entry . '<br>';
 
                 $chan->table = 'migrations';
                 $chan->addField('name', $entry);
@@ -33,4 +36,11 @@ if ($handle = opendir($path)) {
     }
 
     closedir($handle);
+}
+
+if ('' === $tableName) {
+    echo 'nothing migrate';
+} else {
+    echo $tableName;
+    echo 'migrated';
 }

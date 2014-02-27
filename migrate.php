@@ -1,6 +1,6 @@
 <?php
 include 'main.php';
-$path = 'migration/';
+$path = 'migrations/';
 $chan->connect();
 
 // Check if migrations table exists

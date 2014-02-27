@@ -15,7 +15,7 @@ class chan {
     public $valueArray       = array();
     public $sqlErrorMessage  = '';
     public $table            = '';
-    public $pk               = '`id`';
+    public $pk               = '';
     public $pkValue          = '';
 
     // Email variable
@@ -74,7 +74,7 @@ class chan {
     /**
      * Start Session
      */
-    function sessionOn() {
+    public function sessionOn() {
         if (!isset($_SESSION)) session_start();
     }
 
@@ -82,7 +82,7 @@ class chan {
      * Execute sql
      * @param string $sql SQL statement
      */
-    function sqlExecute($sql) {
+    public function sqlExecute($sql) {
         mysql_select_db($this->db, $this->conn);
 
         if (!mysql_query($sql, $this->conn)) {
@@ -98,7 +98,7 @@ class chan {
     /**
      * Connect to database
      */
-    function connect() {
+    public function connect() {
         $this->conn = mysql_connect($this->host, $this->username, $this->password) or trigger_error(mysql_error(), E_USER_ERROR);
         mysql_query("SET NAMES 'utf8'");
     }
@@ -112,7 +112,7 @@ class chan {
      * @param string $theNotDefinedValue value if not self defined
      * @return mixed
      */
-    function toSql($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") {
+    public function toSql($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") {
       if (PHP_VERSION < 6) {
         $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
       }
@@ -147,7 +147,7 @@ class chan {
      * @param mixed $value filed value
      * @param string $type field type
      */
-    function addField($field, $value, $type = 'text') {
+    public function addField($field, $value, $type = 'text') {
         $this->fieldArray[] = '`' . $field . '`';
         $this->valueArray[] = $this->toSql($value, $type);
     }
@@ -158,7 +158,7 @@ class chan {
      * @param string $field field name
      * @return string
      **/
-    function getFileName($field) {
+    public function getFileName($field) {
         $sql = sprintf("SELECT %s FROM %s WHERE %s = %s",
                 $field,
                 $this->table,
@@ -172,7 +172,7 @@ class chan {
      * Delte file from database
      * @param string $path file path
      **/
-    function dataFileDelete($path) {
+    public function dataFileDelete($path) {
         if (count($this->fileDeleteArray) > 0) {
             if (is_dir($path)) {
                 foreach ($this->fileDeleteArray as $fileName) {
@@ -199,8 +199,10 @@ class chan {
 
     /**
      * Insert data
+     *
+     * @return boolean
      */
-    function dataInsert() {
+    public function dataInsert() {
         $sqlIns = sprintf("INSERT INTO %s (%s) VALUES(%s)",
             $this->table,
             implode(', ', $this->fieldArray),
@@ -214,8 +216,9 @@ class chan {
      * Update data
      *
      * @param string $where defined where condition
+     * @return boolean
      */
-    function dataUpdate($where = NULL) {
+    public function dataUpdate($where = NULL) {
         $sqlString = array();
 
         foreach ($this->fieldArray as $k => $v) {
@@ -238,11 +241,25 @@ class chan {
     }
 
     /**
+     * Insert or update data
+     *
+     * @param string $where defined where condiion
+     * @return boolean
+     */
+    public function save($where = NULL) {
+        if ('' === $this->pkValue) {
+            return $this->dataInsert();
+        } else {
+            return $this->dataUpdate($where);
+        }
+    }
+
+    /**
      * Delete data
      *
      * @param string $where defined where condition
      */
-    function dataDelete($where = NULL) {
+    public function dataDelete($where = NULL) {
         if (NULL === $where) {
             $where = sprintf("%s = %s",
                 $this->pk,
@@ -260,7 +277,7 @@ class chan {
     /**
      * Clear fields
      */
-    function clearFields() {
+    public function clearFields() {
         $this->pk = '';
         $this->pkValue = '';
         unset($this->fieldArray);
@@ -270,7 +287,7 @@ class chan {
     /**
      * Check source url
      */
-     function checkSourceUrl() {
+     public function checkSourceUrl() {
          if (false === stripos($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST'])) {
             die('Not the same domain');
          }
@@ -285,7 +302,7 @@ class chan {
      * @param integer $limit string max length
      * @param string $method form method
      */
-    function addValidateField($name, $field, $type = 'text', $tableField = '', $limit = 0, $method = 'POST') {
+    public function addValidateField($name, $field, $type = 'text', $tableField = '', $limit = 0, $method = 'POST') {
         array_push($this->validateArray,
             array(
                 'name'       => $name,
@@ -302,7 +319,7 @@ class chan {
      *
      * @return result
      */
-    function serverValidate() {
+    public function serverValidate() {
         $emailPattern = '/^\w+[\w\+\.\-]*@\w+(?:[\.\-]\w+)*\.\w+$/i';
         $numberPattern = '/[0-9]/';
         $positvePattern = '/^\d+$/';
@@ -370,7 +387,7 @@ class chan {
     /**
      * Show validate error message
      */
-    function showValidateMessage() {
+    public function showValidateMessage() {
         if (true === $this->validateError) {
             echo $this->meta;
             echo $this->validateMessage;
@@ -384,7 +401,7 @@ class chan {
      * @param string $sql sql statement
      * @return data|NULL
      */
-    function myOneRow($sql) {
+    public function myOneRow($sql) {
         mysql_select_db($this->db, $this->conn);
         $rec = mysql_query($sql, $this->conn) or die(mysql_error());
         $row = mysql_fetch_assoc($rec);
@@ -413,7 +430,7 @@ class chan {
      * @param string $sql sql statement
      * @return data|NULL
      */
-    function myRow($sql) {
+    public function myRow($sql) {
         mysql_select_db($this->db, $this->conn);
         $rec = mysql_query($sql, $this->conn) or die(mysql_error());
         $row = mysql_fetch_assoc($rec);
@@ -452,7 +469,7 @@ class chan {
      * @param integer $max data per page
      * @return data
      */
-    function myRowList($sql, $max = 10) {
+    public function myRowList($sql, $max = 10) {
         $this->page = isset($_GET['page']) ? $_GET['page'] : 0;
         $startRow = $this->page * $max;
         $row = $this->myRow($sql);
@@ -475,7 +492,7 @@ class chan {
      * @param string $string combine string
      * @return string
      */
-    function combineQueryString($string) {
+    public function combineQueryString($string) {
         $result = '';
 
         if (!empty($_SERVER['QUERY_STRING'])) {
@@ -502,7 +519,7 @@ class chan {
      * @param integer $limit data per page
      * @return string
      */
-    function pager($limit = 5) {
+    public function pager($limit = 5) {
         $sep = '&nbsp;';
         $result = '';
         $result .= $this->pageString('prev', NULL, 'prev') . $sep;
@@ -517,7 +534,7 @@ class chan {
      * @param integer $limit data per page
      * @return string
      */
-    function bootstrapPager($limit = 6) {
+    public function bootstrapPager($limit = 6) {
         $currentPage = $_SERVER["PHP_SELF"];
         $result = '';
         $result .= '<ul class="pagination">';
@@ -581,7 +598,7 @@ class chan {
      * @param string $class css class name
      * @return string
      */
-    function pageString($method, $string = NULL, $class = '') {
+    public function pageString($method, $string = NULL, $class = '') {
         $currentPage = $_SERVER["PHP_SELF"];
         $result = '';
 
@@ -646,7 +663,7 @@ class chan {
      * @param string $set seperation
      * @return string
      */
-    function pageNumber($limit = 5, $sep = '&nbsp;') {
+    public function pageNumber($limit = 5, $sep = '&nbsp;') {
         $result = '';
         $currentPage = $_SERVER["PHP_SELF"];
         $limitLinksEndCount = $limit;
@@ -682,7 +699,7 @@ class chan {
      *
      * @param string url redirect page when logout
      */
-    function logout($url = 'index.php') {
+    public function logout($url = 'index.php') {
         $this->sessionOn();
         session_destroy();
 
@@ -699,7 +716,7 @@ class chan {
     /**
      * Save page to session as last visied page
      */
-    function lastPage () {
+    public function lastPage () {
         $this->sessionOn();
         $_SESSION['lastPage'] = $this->retUri();
     }
@@ -709,7 +726,7 @@ class chan {
      *
      * @param string $url redirect url
      */
-    function reUrl($url) {
+    public function reUrl($url) {
         header(sprintf('Location: %s', $url));
     }
 
@@ -718,7 +735,7 @@ class chan {
      *
      * @param array $level level (array(1, 2, ...))
      */
-    function loginLevel($level = array()) {
+    public function loginLevel($level = array()) {
         $this->sessionOn();
         $this->loginNeed();
 
@@ -733,7 +750,7 @@ class chan {
      *
      * @param string $url redirect page
      */
-    function loginLimit($url = 'index.php') {
+    public function loginLimit($url = 'index.php') {
         $this->sessionOn();
 
         if (isset($_SESSION['login'])) {
@@ -747,7 +764,7 @@ class chan {
      *
      * @param string $url login page
      */
-    function loginNeed($url = NULL) {
+    public function loginNeed($url = NULL) {
         $this->sessionOn();
         $this->lastPage();
 
@@ -766,7 +783,7 @@ class chan {
      * @param string $string alert string
      * @param string $url redirect url
      */
-    function jsRedirect($string = NULL, $url = NULL) {
+    public function jsRedirect($string = NULL, $url = NULL) {
         echo $this->meta;
         echo '<script>';
         echo 'alert("' . $string . '");';
@@ -784,7 +801,7 @@ class chan {
      * @param string $fileName file name
      * @param integer $width default excel column width
      **/
-    function makeExcel($sql = '', $titles = array(), $fields = array(), $fileName = NULL, $width = 12) {
+    public function makeExcel($sql = '', $titles = array(), $fields = array(), $fileName = NULL, $width = 12) {
         $class = dirname(__FILE__) . '/PHPExcel.php';
         if (NULL === $fileName) {
             $fileName = date('YmdHis') . rand(1000, 9999);
@@ -828,7 +845,7 @@ class chan {
      * @param string $string string need to be convert
      * @return string
      */
-    function convertEscape($string) {
+    public function convertEscape($string) {
         return str_replace('/', '\/', str_replace('"', '\"', $string));
     }
 
@@ -838,7 +855,7 @@ class chan {
      * @param array $variables required variables
      * @param string $url redirect url
      */
-    function reqVariable($variable = NULL, $url = 'index.php') {
+    public function reqVariable($variable = NULL, $url = 'index.php') {
         if ('array' === gettype($variable)) {
             foreach ($variables as $value) {
                 if (!isset($_GET[$value]) || empty($_GET[$value])) {
@@ -859,7 +876,7 @@ class chan {
      *
      * @param integer $day cookie exist day
      */
-    function tempCookieId($day = 7) {
+    public function tempCookieId($day = 7) {
         $time = time() + 3600 * 24 * $day;
 
         if (!isset($_COOKIE['tempId'])) {
@@ -883,7 +900,7 @@ class chan {
      * n - Number of full minutes
      * s - Number of full seconds (default)
      */
-    function dateDiff($interval, $datefrom, $dateto, $using_timestamps = false) {
+    public function dateDiff($interval, $datefrom, $dateto, $using_timestamps = false) {
         if (!$using_timestamps) {
             $datefrom = strtotime($datefrom, 0);
             $dateto = strtotime($dateto, 0);
@@ -978,7 +995,7 @@ class chan {
      *
      * @param string $directory directory name
      */
-    function makeDir($directory) {
+    public function makeDir($directory) {
         if (!is_dir($directory)) {
             mkdir($directory, 0777);
         }
@@ -987,7 +1004,7 @@ class chan {
     /**
      * Send email
      */
-    function email() {
+    public function email() {
         $class = dirname(__FILE__) . '/class.phpmailer.php';
         if (!file_exists($class)) {
             return 'Email class is not exist';
@@ -1017,7 +1034,7 @@ class chan {
      * @param string $date date string
      * @return string
      */
-    function dateOnly($date) {
+    public function dateOnly($date) {
         return date('Y-m-d', strtotime($date));
     }
 
@@ -1028,7 +1045,7 @@ class chan {
      * @param integer $length string length
      * @param string $symbol replace string
      */
-    function cutStr($string, $length, $symbol = '...') {
+    public function cutStr($string, $length, $symbol = '...') {
         mb_internal_encoding($this->charset);
         $string = trim(strip_tags($string));
 
@@ -1046,7 +1063,7 @@ class chan {
      * @param string $where where condition
      * @return data
      */
-    function retData($fields = array(), $where = '') {
+    public function retData($fields = array(), $where = '') {
         $fields = implode(', ', preg_replace('/^(.*?)$/', "`$1`", $fields));
         $sql = sprintf("SELECT %s FROM %s WHERE %s",
             $fields,
@@ -1061,7 +1078,7 @@ class chan {
      *
      * @return string
      */
-    function retNow() {
+    public function retNow() {
         return date('Y-m-d H:i:s');
     }
 
@@ -1070,7 +1087,7 @@ class chan {
      *
      * @return string
      */
-    function retIp() {
+    public function retIp() {
         return $_SERVER['REMOTE_ADDR'];
     }
 
@@ -1080,7 +1097,7 @@ class chan {
      * @param string $url combine url if assigned
      * @return string
      */
-    function retUri($url = NULL) {
+    public function retUri($url = NULL) {
         if (NULL === $url) {
             return 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         } else {
@@ -1096,7 +1113,7 @@ class chan {
      * @param string $where where condition
      * @return integer
      */
-    function retMaxSort($sort, $where = '1 = 1') {
+    public function retMaxSort($sort, $where = '1 = 1') {
         $sql = sprintf("SELECT MAX(%s) as `maxSort` FROM %s WHERE %s",
             '`' . $sort . '`',
             $this->table,
@@ -1112,7 +1129,7 @@ class chan {
      * $text - 名稱
      * $name - 第一項標題
      */
-    function retSmartyOption($data = NULL, $value, $text, $select = NULL) {
+    public function retSmartyOption($data = NULL, $value, $text, $select = NULL) {
         $result = array();
 
         if (NULL !== $data) {
@@ -1135,7 +1152,7 @@ class chan {
      *
      * @param string $message message to be show
      */
-    function showMsg($message = NULL) {
+    public function showMsg($message = NULL) {
         if (NULL !== $message) {
             echo '<div style="border: 1px solid orange; text-align: center; background: #E1FDE3; padding: 4px; font-size: 14px; margin: 2px;">' . $message . '</div>';
         }
@@ -1148,7 +1165,7 @@ class chan {
      * @param string $file file name
      * @return array
      **/
-    function fileUpload($path = '/', $file = '') {
+    public function fileUpload($path = '/', $file = '') {
         $class = dirname(__FILE__) . '/class.upload.php';
         $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
         $lang = file_exists($langFile) ? 'zh_TW' : '';
@@ -1186,7 +1203,7 @@ class chan {
      * @param string $file file name
      * @return array
      **/
-    function imageUpload($path = '/', $img = '') {
+    public function imageUpload($path = '/', $img = '') {
         $class = dirname(__FILE__) . '/class.upload.php';
         $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
         $lang = file_exists($langFile) ? 'zh_TW' : '';
@@ -1234,7 +1251,7 @@ class chan {
      * @param string $nameOnly return string when true
      * @return mixed
      */
-    function fitThumb($dir, $img, $width = 0, $height = 0, $noFile = '', $nameOnly = false) {
+    public function fitThumb($dir, $img, $width = 0, $height = 0, $noFile = '', $nameOnly = false) {
         $dir = str_replace(' ', '' , $dir);
         $thumbDir = $dir . 'thumbnails/';
         $class = dirname(__FILE__) . '/class.upload.php';
@@ -1320,7 +1337,7 @@ class chan {
      * @param string $nameOnly return string when true
      * @return mixed
      */
-    function squareThumb($dir, $img, $ratio = 150, $noFile = '', $nameOnly = false) {
+    public function squareThumb($dir, $img, $ratio = 150, $noFile = '', $nameOnly = false) {
         $dir = str_replace(' ', '' , $dir);
         $thumbDir = $dir . 'thumbnails/';
         $class = dirname(__FILE__) . '/class.upload.php';
@@ -1395,7 +1412,7 @@ class chan {
      * @param string $nameOnly return string when true
      * @return mixed
      */
-    function thumb($dir, $img, $width = 0, $height = 0, $noFile = '', $nameOnly = false) {
+    public function thumb($dir, $img, $width = 0, $height = 0, $noFile = '', $nameOnly = false) {
         $dir = str_replace(' ', '' , $dir);
         $thumbDir = $dir . 'thumbnails/';
         $class = dirname(__FILE__) . '/class.upload.php';
@@ -1476,7 +1493,7 @@ class chan {
      * @param integer length
      * @return string
      */
-    function randomPwd($length = 8)
+    public function randomPwd($length = 8)
     {
         $result = '';
         $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

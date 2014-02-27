@@ -1864,18 +1864,18 @@ class chan {
 
             if (true === $this->sqlExecute($result)) {
                 $this->migrated = true;
-                echo $this->table . " created<br>";
+                echo $this->table . ' created<br>';
             } else {
                 $this->migrated = false;
-                echo $this->table . " error<br>";
+                echo $this->table . ' error<br>';
             }
         } else {
             if (true === $this->sqlExecute($sql)) {
                 $this->migrated = true;
-                echo "sql finished<br>";
+                echo 'sql finished<br>';
             } else {
                 $this->migrated = false;
-                echo "sql error<br>";
+                echo 'sql error<br>';
             }
         }
 

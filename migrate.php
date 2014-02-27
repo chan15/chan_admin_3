@@ -48,7 +48,7 @@ if ('' !== $file) {
         $chan->sqlExecute($sql);
     }
 
-    $tableName = '';
+    $result = '';
 
     // Start to read file and check
     if ($handle = opendir($path)) {
@@ -60,13 +60,16 @@ if ('' !== $file) {
 
                 if (NULL === $row) {
                     $sql = file_get_contents($path . $entry);
-                    $chan->sqlExecute($sql);
-                    $tableName .= $entry . '<br>';
+                    if (true === $chan->sqlExecute($sql)) {
+			    $result .= $entry . " created\n";
+			    $chan->table = 'migrations';
+			    $chan->addField('name', $entry);
+			    $chan->addField('created_at', $chan->retNow(), 'date');
+			    $chan->save();
+		    } else {
+			    $result .= $entry . " error\n";
+		    }
 
-                    $chan->table = 'migrations';
-                    $chan->addField('name', $entry);
-                    $chan->addField('created_at', $chan->retNow(), 'date');
-                    $chan->save();
                 }
             }
         }
@@ -74,10 +77,10 @@ if ('' !== $file) {
         closedir($handle);
     }
 
-    if ('' === $tableName) {
+    if ('' === $result) {
         echo 'nothing to migrate';
     } else {
-        echo $tableName . 'migrated';
+        echo $result;
     }
 }
 

@@ -65,8 +65,9 @@ class chan {
     private $_langFileNotExist = '檔案不存在';
 
     // Migration variable
-    private $_fields = array();
-    private $_fieldName = '';
+    private $_columns = array();
+    private $_column = '';
+    private $_columnName = '';
     private $_indexes = array();
     public $timestamp = false;
     public $engine = 'innoDB';
@@ -1513,153 +1514,206 @@ class chan {
     }
 
     /**
-     * Build increment field
+     * Build increment column
      *
-     * @param string $name filed name
+     * @param string $name column name
      */
     public function increments($name) {
-        $this->_fieldName = $name;
-        $this->_fields[$name] = sprintf("`%s` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT",
+        $this->_columnName = $name;
+        $this->_columns[$name] = sprintf("`%s` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT",
             $name);
 
         return $this;
     }
 
     /**
-     * Build string field
+     * Build string column
      *
-     * @param string $name filed name
+     * @param string $name column name
      * @param integer $length length
      */
     public function string($name, $length = 255) {
-        $this->_fieldName = $name;
-        $this->_fields[$name] = sprintf("`%s` VARCHAR(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
-            $name,
-            $length);
+        if ('' !== $this->_column) {
+            $this->_column .= sprintf(" VARCHAR(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
+                intval($name));
+        } else {
+            $this->_columnName = $name;
+            $this->_columns[$name] = sprintf("`%s` VARCHAR(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
+                $name,
+                $length);
+        }
 
         return $this;
     }
 
     /**
-     * Build text field
+     * Build text column
      *
-     * @param string $name filed name
+     * @param string $name column name
      */
-    public function text($name) {
-        $this->_fieldName = $name;
-        $this->_fields[$name] = sprintf("`%s` TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
-            $name);
+    public function text($name = NULL) {
+        if ('' !== $this->_column) {
+            $this->_column .= " TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL";
+        } else {
+            $this->_columnName = $name;
+            $this->_columns[$name] = sprintf("`%s` TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
+                $name);
+        }
 
         return $this;
     }
 
     /**
-     * Build text field
+     * Build text column
      *
-     * @param string $name filed name
+     * @param string $name column name
      * @param array $value value
      */
     public function enum($name, $value = array()) {
-        $this->_fieldName = $name;
-        $this->_fields[$name] = sprintf("`%s` ENUM(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
-            $name,
-            "'" . implode("','", $value) . "'");
-
-        return $this;
-    }
-
-    /**
-     * Build integer field
-     *
-     * @param string $name filed name
-     * @param integer $length length
-     */
-    public function integer($name, $length = '') {
-        $this->_fieldName = $name;
-
-        if (0 === intval($length)) {
-            $this->_fields[$name] = sprintf("`%s` INT UNSIGNED NOT NULL",
-                $name);
+        if ('' !== $this->_column) {
+            $this->_column .= sprintf(" ENUM(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
+                "'" . implode("','", $name) . "'");
         } else {
-            $this->_fields[$name] = sprintf("`%s` INT(%s) UNSIGNED NOT NULL",
+            $this->_columnName = $name;
+            $this->_columns[$name] = sprintf("`%s` ENUM(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
                 $name,
-                $length);
+                "'" . implode("','", $value) . "'");
         }
 
         return $this;
     }
 
     /**
-     * Build tiny integer field
+     * Build integer column
      *
-     * @param string $name filed name
+     * @param string $name column name
      * @param integer $length length
      */
-    public function tinyint($name, $length = '') {
-        $this->_fieldName = $name;
-
-        if (0 === intval($length)) {
-            $this->_fields[$name] = sprintf("`%s` TINYINT UNSIGNED NOT NULL",
-                $name);
+    public function integer($name, $length = 0) {
+        if ('' !== $this->_column) {
+            if (0 === intval($name)) {
+                $this->_column .= ' INT UNSIGNED NOT NULL';
+            } else {
+                $this->_column .= sprintf(" INT(%s) UNSIGNED NOT NULL",
+                    intval($name));
+            }
         } else {
-            $this->_fields[$name] = sprintf("`%s` TINYINT(%s) UNSIGNED NOT NULL",
-                $name,
-                $length);
+            $this->_columnName = $name;
+
+            if (0 === intval($length)) {
+                $this->_columns[$name] = sprintf("`%s` INT UNSIGNED NOT NULL",
+                    $name);
+            } else {
+                $this->_columns[$name] = sprintf("`%s` INT(%s) UNSIGNED NOT NULL",
+                    $name,
+                    $length);
+            }
         }
 
         return $this;
     }
 
+    /**
+     * Build tiny integer column
+     *
+     * @param string $name column name
+     * @param integer $length length
+     */
+    public function tinyint($name, $length = 0) {
+        if ('' !== $this->_column) {
+            if (0 === intval($name)) {
+                $this->_column .= " TINYINT UNSIGNED NOT NULL";
+            } else {
+                $this->_column .= sprintf(" TINYINT(%s) UNSIGNED NOT NULL",
+                    intval($name));
+            }
+        } else {
+            $this->_columnName = $name;
+
+            if (0 === intval($length)) {
+                $this->_columns[$name] = sprintf("`%s` TINYINT UNSIGNED NOT NULL",
+                    $name);
+            } else {
+                $this->_columns[$name] = sprintf("`%s` TINYINT(%s) UNSIGNED NOT NULL",
+                    $name,
+                    $length);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Build boolean column
+     *
+     * @param string $name column name
+     */
     public function boolean($name) {
-        $this->_fieldName = $name;
-        $this->_fields[$name] = sprintf("`%s` TINYINT(1) UNSIGNED NOT NULL",
-            $name);
+        if ('' !== $this->_column) {
+            $this->_column .= ' TINYINT(1) UNSIGNED NOT NULL';
+        } else {
+            $this->_columnName = $name;
+            $this->_columns[$name] = sprintf("`%s` TINYINT(1) UNSIGNED NOT NULL",
+                $name);
+        }
 
         return $this;
     }
 
     /**
-     * Build datetime field
+     * Build datetime column
      *
-     * @param string $name filed name
+     * @param string $name column name
      */
     public function datetime($name) {
-        $this->_fieldName = $name;
-        $this->_fields[$name] = sprintf("`%s` DATETIME NOT NULL",
-            $name);
+        if ('' !== $this->_column) {
+            $this->_column .= ' DATETIME NOT NULL';
+        } else {
+            $this->_columnName = $name;
+            $this->_columns[$name] = sprintf("`%s` DATETIME NOT NULL",
+                $name);
+        }
 
         return $this;
     }
 
     /**
-     * Build date field
+     * Build date column
      *
      * @param string $name filed name
      */
     public function date($name) {
-        $this->_fieldName = $name;
-        $this->_fields[$name] = sprintf("`%s` DATE NOT NULL",
-            $name);
+        if ('' !== $this->_column) {
+            $this->_column .= ' DATE NOT NULL';
+        } else {
+            $this->_columnName = $name;
+            $this->_columns[$name] = sprintf("`%s` DATE NOT NULL",
+                $name);
+        }
 
         return $this;
     }
 
     /**
-     * Build timestamp field
+     * Build timestamp column
      *
      * @param string $name filed name
      */
     public function timestamp($name) {
-        $this->_fieldName = $name;
-        $this->_fields[$name] = sprintf("`%s` TIMESTAMP NOT NULL",
-            $name);
+        if ('' !== $this->_column) {
+            $this->_column .= ' TIMESTAMP NOT NULL';
+        } else {
+            $this->_columnName = $name;
+            $this->_columns[$name] = sprintf("`%s` TIMESTAMP NOT NULL",
+                $name);
+        }
 
         return $this;
     }
 
 
     /**
-     * Index field
+     * Index column
      *
      * @param string $name filed name
      */
@@ -1669,21 +1723,29 @@ class chan {
     }
 
     /**
-     * Signed field
+     * Make column signed
      *
      */
     public function signed() {
-        $this->_fields[$this->_fieldName] = str_replace('UNSIGNED', 'SIGNED', $this->_fields[$this->_fieldName]);
+        if ('' !== $this->_column) {
+            $this->_column = str_replace('UNSIGNED', 'SIGNED', $this->_column);
+        } else {
+            $this->_columns[$this->_columnName] = str_replace('UNSIGNED', 'SIGNED', $this->_columns[$this->_columnName]);
+        }
 
         return $this;
     }
 
     /**
-     * Make field NULL
+     * Make column NULL
      *
      */
     public function nullable() {
-        $this->_fields[$this->_fieldName] = str_replace('NOT NULL', 'NULL', $this->_fields[$this->_fieldName]);
+        if ('' !== $this->_column) {
+            $this->_column = str_replace('NOT NULL', 'NULL', $this->_column);
+        } else {
+            $this->_columns[$this->_columnName] = str_replace('NOT NULL', 'NULL', $this->_columns[$this->_columnName]);
+        }
 
         return $this;
     }
@@ -1695,25 +1757,98 @@ class chan {
      */
     public function defaultValue($default = NULL) {
         if (NULL !== $default) {
-            $this->_fields[$this->_fieldName] = $this->_fields[$this->_fieldName] . " DEFAULT '" . $default . "'";
+            if ('' !== $this->_column) {
+                $this->_column .= " DEFAULT '" . $default . "'";
+            } else {
+                $this->_columns[$this->_columnName] = $this->_columns[$this->_columnName] . " DEFAULT '" . $default . "'";
+            }
         }
 
         return $this;
     }
 
     /**
-     * Create table
+     * Modify after
+     *
+     * @param string name column name
+     */
+    public function after($name) {
+        $this->_column .= sprintf(" AFTER `%s`",
+            $name);
+
+        return $this;
+    }
+
+    /**
+     * Drop column
+     *
+     * @param string name column name
+     */
+    public function dropColumn($name) {
+        $sql = sprintf("ALTER TABLE `%s` DROP `%s`",
+            $this->table,
+            $name);
+        $this->migrate($sql);
+    }
+
+    /**
+     * Add column
+     *
+     * @param string name column name
+     */
+    public function addColumn($name) {
+        $this->_column = sprintf("ALTER TABLE `%s` ADD `%s`",
+            $this->table,
+            $name);
+
+        return $this;
+    }
+
+    /**
+     * Add column
+     *
+     * @param string name column name
+     */
+    public function changeColumn($name, $newName) {
+        $this->_column = sprintf("ALTER TABLE `%s` CHANGE `%s` `%s`",
+            $this->table,
+            $name,
+            $newName);
+
+        return $this;
+    }
+
+    /**
+     * Alter table
+     *
+     */
+    public function alterTable() {
+        $this->migrate($this->_column);
+    }
+
+    /**
+     * Drop table
+     *
+     */
+    public function dropTable() {
+        $sql = sprintf("DROP TABLE `%s`",
+            $this->table);
+        $this->migrate($sql);
+    }
+
+    /**
+     * Migrate
      *
      */
     public function migrate($sql = NULL) {
         if (NULL === $sql) {
             if (true === $this->timestamp) {
-                $this->_fields['created_at'] = '`created_at` TIMESTAMP NULL DEFAULT NULL';
-                $this->_fields['updated_at'] = '`updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP';
+                $this->_columns['created_at'] = '`created_at` TIMESTAMP NULL DEFAULT NULL';
+                $this->_columns['updated_at'] = '`updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP';
             }
 
             $result = 'CREATE TABLE `' . $this->table . '` (';
-            $result .= implode(',', array_merge($this->_fields, $this->_indexes));
+            $result .= implode(',', array_merge($this->_columns, $this->_indexes));
             $result .= ') ENGINE=' . $this->engine . ' CHARACTER SET utf8 COLLATE = utf8_unicode_ci;';
 
             if (true === $this->sqlExecute($result)) {
@@ -1728,6 +1863,13 @@ class chan {
                 echo "sql error<br>";
             }
         }
+
+        $this->table = '';
+        $this->_columns = array();
+        $this->_column = '';
+        $this->_columnName = '';
+        $this->_indexes = array();
+        $this->timestamp = false;
     }
 
     /**

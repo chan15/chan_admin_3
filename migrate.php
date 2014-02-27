@@ -36,7 +36,7 @@ if ('' !== $file) {
         echo $file . ' table created';
     }
 } else {
-    // Migrate
+    // Migration
     $chan->connect();
 
     // Check if migrations table exists

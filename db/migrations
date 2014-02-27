@@ -1,0 +1,4 @@
+CREATE TABLE `migrations` (
+    `name` VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL
+) ENGINE=innoDB CHARACTER SET utf8 COLLATE utf8_unicode_ci;

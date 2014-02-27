@@ -14,7 +14,7 @@ if (false === $result) {
 
 $tableName = '';
 
-// Start reading file and check
+// Start to read file and check
 if ($handle = opendir($path)) {
     while (false !== ($entry = readdir($handle))) {
         if (false === is_dir($entry) && 'migrations' !== $entry) {
@@ -39,8 +39,7 @@ if ($handle = opendir($path)) {
 }
 
 if ('' === $tableName) {
-    echo 'nothing migrate';
+    echo 'nothing to migrate';
 } else {
-    echo $tableName;
-    echo 'migrated';
+    echo $tableName . 'migrated';
 }

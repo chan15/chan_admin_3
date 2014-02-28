@@ -66,10 +66,11 @@ class chan {
 
     // Migration variable
     private $_columns = array();
-    private $_column = '';
     private $_columnName = '';
     private $_indexes = array();
+    public $column = '';
     public $migrated = true;
+    public $migrationName = '';
     public $timestamp = false;
     public $engine = 'innoDB';
 
@@ -1534,8 +1535,8 @@ class chan {
      * @param integer $length length
      */
     public function string($name, $length = 255) {
-        if ('' !== $this->_column) {
-            $this->_column .= sprintf(" VARCHAR(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
+        if ('' !== $this->column) {
+            $this->column .= sprintf(" VARCHAR(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
                 intval($name));
         } else {
             $this->_columnName = $name;
@@ -1553,8 +1554,8 @@ class chan {
      * @param string $name column name
      */
     public function text($name = NULL) {
-        if ('' !== $this->_column) {
-            $this->_column .= " TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL";
+        if ('' !== $this->column) {
+            $this->column .= " TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL";
         } else {
             $this->_columnName = $name;
             $this->_columns[$name] = sprintf("`%s` TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
@@ -1571,8 +1572,8 @@ class chan {
      * @param array $value value
      */
     public function enum($name, $value = array()) {
-        if ('' !== $this->_column) {
-            $this->_column .= sprintf(" ENUM(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
+        if ('' !== $this->column) {
+            $this->column .= sprintf(" ENUM(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
                 "'" . implode("','", $name) . "'");
         } else {
             $this->_columnName = $name;
@@ -1591,11 +1592,11 @@ class chan {
      * @param integer $length length
      */
     public function integer($name, $length = 0) {
-        if ('' !== $this->_column) {
+        if ('' !== $this->column) {
             if (0 === intval($name)) {
-                $this->_column .= ' INT UNSIGNED NOT NULL';
+                $this->column .= ' INT UNSIGNED NOT NULL';
             } else {
-                $this->_column .= sprintf(" INT(%s) UNSIGNED NOT NULL",
+                $this->column .= sprintf(" INT(%s) UNSIGNED NOT NULL",
                     intval($name));
             }
         } else {
@@ -1621,11 +1622,11 @@ class chan {
      * @param integer $length length
      */
     public function tinyint($name, $length = 0) {
-        if ('' !== $this->_column) {
+        if ('' !== $this->column) {
             if (0 === intval($name)) {
-                $this->_column .= " TINYINT UNSIGNED NOT NULL";
+                $this->column .= " TINYINT UNSIGNED NOT NULL";
             } else {
-                $this->_column .= sprintf(" TINYINT(%s) UNSIGNED NOT NULL",
+                $this->column .= sprintf(" TINYINT(%s) UNSIGNED NOT NULL",
                     intval($name));
             }
         } else {
@@ -1650,8 +1651,8 @@ class chan {
      * @param string $name column name
      */
     public function boolean($name) {
-        if ('' !== $this->_column) {
-            $this->_column .= ' TINYINT(1) UNSIGNED NOT NULL';
+        if ('' !== $this->column) {
+            $this->column .= ' TINYINT(1) UNSIGNED NOT NULL';
         } else {
             $this->_columnName = $name;
             $this->_columns[$name] = sprintf("`%s` TINYINT(1) UNSIGNED NOT NULL",
@@ -1667,8 +1668,8 @@ class chan {
      * @param string $name column name
      */
     public function datetime($name) {
-        if ('' !== $this->_column) {
-            $this->_column .= ' DATETIME NOT NULL';
+        if ('' !== $this->column) {
+            $this->column .= ' DATETIME NOT NULL';
         } else {
             $this->_columnName = $name;
             $this->_columns[$name] = sprintf("`%s` DATETIME NOT NULL",
@@ -1684,8 +1685,8 @@ class chan {
      * @param string $name filed name
      */
     public function date($name) {
-        if ('' !== $this->_column) {
-            $this->_column .= ' DATE NOT NULL';
+        if ('' !== $this->column) {
+            $this->column .= ' DATE NOT NULL';
         } else {
             $this->_columnName = $name;
             $this->_columns[$name] = sprintf("`%s` DATE NOT NULL",
@@ -1701,8 +1702,8 @@ class chan {
      * @param string $name filed name
      */
     public function timestamp($name) {
-        if ('' !== $this->_column) {
-            $this->_column .= ' TIMESTAMP NOT NULL';
+        if ('' !== $this->column) {
+            $this->column .= ' TIMESTAMP NOT NULL';
         } else {
             $this->_columnName = $name;
             $this->_columns[$name] = sprintf("`%s` TIMESTAMP NOT NULL",
@@ -1711,7 +1712,6 @@ class chan {
 
         return $this;
     }
-
 
     /**
      * Index column
@@ -1728,8 +1728,8 @@ class chan {
      *
      */
     public function signed() {
-        if ('' !== $this->_column) {
-            $this->_column = str_replace('UNSIGNED', 'SIGNED', $this->_column);
+        if ('' !== $this->column) {
+            $this->column = str_replace('UNSIGNED', 'SIGNED', $this->column);
         } else {
             $this->_columns[$this->_columnName] = str_replace('UNSIGNED', 'SIGNED', $this->_columns[$this->_columnName]);
         }
@@ -1742,8 +1742,8 @@ class chan {
      *
      */
     public function nullable() {
-        if ('' !== $this->_column) {
-            $this->_column = str_replace('NOT NULL', 'NULL', $this->_column);
+        if ('' !== $this->column) {
+            $this->column = str_replace('NOT NULL', 'NULL', $this->column);
         } else {
             $this->_columns[$this->_columnName] = str_replace('NOT NULL', 'NULL', $this->_columns[$this->_columnName]);
         }
@@ -1758,8 +1758,8 @@ class chan {
      */
     public function defaultValue($default = NULL) {
         if (NULL !== $default) {
-            if ('' !== $this->_column) {
-                $this->_column .= " DEFAULT '" . $default . "'";
+            if ('' !== $this->column) {
+                $this->column .= " DEFAULT '" . $default . "'";
             } else {
                 $this->_columns[$this->_columnName] = $this->_columns[$this->_columnName] . " DEFAULT '" . $default . "'";
             }
@@ -1774,7 +1774,7 @@ class chan {
      * @param string name column name
      */
     public function after($name) {
-        $this->_column .= sprintf(" AFTER `%s`",
+        $this->column .= sprintf(" AFTER `%s`",
             $name);
 
         return $this;
@@ -1786,7 +1786,7 @@ class chan {
      * @param string name column name
      */
     public function dropColumn($name) {
-        $this->_column = sprintf("ALTER TABLE `%s` DROP `%s`",
+        $this->column = sprintf("ALTER TABLE `%s` DROP `%s`",
             $this->table,
             $name);
     }
@@ -1797,7 +1797,7 @@ class chan {
      * @param string name column name
      */
     public function indexColumn($name) {
-        $this->_column = sprintf("ALTER TABLE `%s` ADD INDEX(`%s`)",
+        $this->column = sprintf("ALTER TABLE `%s` ADD INDEX(`%s`)",
             $this->table,
             $name);
     }
@@ -1808,7 +1808,7 @@ class chan {
      * @param string name column name
      */
     public function addColumn($name) {
-        $this->_column = sprintf("ALTER TABLE `%s` ADD `%s`",
+        $this->column = sprintf("ALTER TABLE `%s` ADD `%s`",
             $this->table,
             $name);
 
@@ -1821,7 +1821,7 @@ class chan {
      * @param string name column name
      */
     public function changeColumn($name, $newName) {
-        $this->_column = sprintf("ALTER TABLE `%s` CHANGE `%s` `%s`",
+        $this->column = sprintf("ALTER TABLE `%s` CHANGE `%s` `%s`",
             $this->table,
             $name,
             $newName);
@@ -1830,29 +1830,33 @@ class chan {
     }
 
     /**
-     * Alter table
-     *
-     */
-    public function alterTable() {
-        $this->migrate($this->_column);
-    }
-
-    /**
      * Drop table
      *
      */
     public function dropTable() {
-        $sql = sprintf("DROP TABLE `%s`",
+        $this->column = sprintf("DROP TABLE `%s`",
             $this->table);
-        $this->migrate($sql);
+    }
+
+    /**
+     * Rename table
+     *
+     * @param string $name table name
+     */
+
+    public function renameTable($name) {
+        $this->column = sprintf("RENAME TABLE `%s` TO `%s`",
+            $this->table,
+            $name);
     }
 
     /**
      * Migrate
      *
      */
-    public function migrate($sql = NULL) {
-        if (NULL === $sql) {
+    public function migrate() {
+        if (0 !== count($this->_columns)) {
+            // Creating table
             if (true === $this->timestamp) {
                 $this->_columns['created_at'] = '`created_at` TIMESTAMP NULL DEFAULT NULL';
                 $this->_columns['updated_at'] = '`updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP';
@@ -1864,37 +1868,45 @@ class chan {
 
             if (true === $this->sqlExecute($result)) {
                 $this->migrated = true;
+                $this->saveToMigarations();
                 echo $this->table . ' created<br>';
             } else {
                 $this->migrated = false;
-                echo $this->table . ' error<br>';
+                echo 'create ' . $this->table . ' error<br>';
             }
         } else {
-            if (true === $this->sqlExecute($sql)) {
-                $this->migrated = true;
-                echo 'sql finished<br>';
+            if ('' === $this->column) {
+                // Executing sql
+                $this->saveToMigarations();
             } else {
-                $this->migrated = false;
-                echo 'sql error<br>';
+                // Executing alter table
+                if (true === $this->sqlExecute($this->column)) {
+                    $this->migrated = true;
+                    $this->saveToMigarations();
+                    echo $this->migrationName .  ' finished<br>';
+                } else {
+                    $this->migrated = false;
+                    echo $this->migrationName . ' error<br>';
+                }
             }
         }
 
         $this->table = '';
+        $this->column = '';
+        $this->migrationName = '';
+        $this->timestamp = false;
         $this->_columns = array();
-        $this->_column = '';
         $this->_columnName = '';
         $this->_indexes = array();
-        $this->timestamp = false;
     }
 
     /**
      * Check if migrations exist
      *
-     * @param string $name migration name
      * @return mix
      */
-    public function checkMigrations($name = NULL) {
-        if (NULL === $name) {
+    public function checkMigrations() {
+        if ('' === $this->migrationName) {
             $sql = "DESCRIBE `migrations`";
             $result = $this->sqlExecute($sql);
 
@@ -1906,9 +1918,20 @@ class chan {
                 $this->migrate();
             }
         } else {
-            $sql = sprintf("SELECT * FROM `migrations` WHERE `name` = %s", $this->toSql($name, 'text'));
+            $sql = sprintf("SELECT * FROM `migrations` WHERE `name` = %s", $this->toSql($this->migrationName, 'text'));
 
             return $this->myRow($sql);
         }
+    }
+
+    /**
+     * Save name to migratsion table
+     *
+     */
+    public function saveToMigarations() {
+        $this->table = 'migrations';
+        $this->addField('name', $this->migrationName);
+        $this->addField('created_at', $this->retNow(), 'date');
+        $this->save();
     }
 }

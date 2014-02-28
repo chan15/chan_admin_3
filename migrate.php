@@ -3,8 +3,8 @@ include 'main.php';
 $chan->connect();
 $chan->checkMigrations();
 
-$name = 'create_admins_table';
-if (NULL === $chan->checkMigrations($name)) {
+$chan->migrationName = 'create_admins_table';
+if (NULL === $chan->checkMigrations()) {
     $chan->table = 'admins';
     $chan->increments('id');
     $chan->string('name');
@@ -12,33 +12,17 @@ if (NULL === $chan->checkMigrations($name)) {
     $chan->boolean('on');
     $chan->timestamp = true;
     $chan->migrate();
-
-    if (true === $chan->migrated) {
-        saveToMigarations($name);
-    }
 }
 
-$name = 'insert_admin_default';
-if (NULL === $chan->checkMigrations($name)) {
+$chan->migrationName = 'insert_admin_default';
+if (NULL === $chan->checkMigrations()) {
     $chan->table = 'admins';
     $chan->addField('name', 'admin');
     $chan->addField('password', 1234);
     $chan->addField('on', 1, 'int');
     $chan->addField('created_at', $chan->retNow(), 'date');
     $chan->save();
-
-    if (true === $chan->migrated) {
-        saveToMigarations($name);
-    }
+    $chan->migrate();
 }
 
-echo 'finished';
-
-function saveToMigarations($name) {
-    global $chan;
-
-    $chan->table = 'migrations';
-    $chan->addField('name', $name);
-    $chan->addField('created_at', $chan->retNow(), 'date');
-    $chan->save();
-}
+echo 'all migration finished';

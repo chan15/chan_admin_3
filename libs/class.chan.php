@@ -1856,7 +1856,7 @@ class chan {
      */
     public function migrate() {
         if (0 !== count($this->_columns)) {
-            // Create table
+            // Creating table
             if (true === $this->timestamp) {
                 $this->_columns['created_at'] = '`created_at` TIMESTAMP NULL DEFAULT NULL';
                 $this->_columns['updated_at'] = '`updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP';
@@ -1867,26 +1867,26 @@ class chan {
             $result .= ') ENGINE=' . $this->engine . ' CHARACTER SET utf8 COLLATE = utf8_unicode_ci;';
 
             if (true === $this->sqlExecute($result)) {
+                echo $this->table . ' created<br>';
                 $this->migrated = true;
                 $this->saveToMigarations();
-                echo $this->table . ' created<br>';
             } else {
-                $this->migrated = false;
                 echo 'create ' . $this->table . ' error<br>';
+                $this->migrated = false;
             }
         } else {
             if ('' === $this->column) {
-                // Execute sql
+                // Executing sql
                 $this->saveToMigarations();
             } else {
-                // Execute alter table
+                // Executing alter table
                 if (true === $this->sqlExecute($this->column)) {
+                    echo $this->migrationName .  ' finished<br>';
                     $this->migrated = true;
                     $this->saveToMigarations();
-                    echo $this->migrationName .  ' finished<br>';
                 } else {
-                    $this->migrated = false;
                     echo $this->migrationName . ' error<br>';
+                    $this->migrated = false;
                 }
             }
         }
@@ -1901,7 +1901,7 @@ class chan {
     }
 
     /**
-     * Check if migration exists
+     * Check if migrations exist
      *
      * @return mix
      */
@@ -1925,7 +1925,7 @@ class chan {
     }
 
     /**
-     * Save name to migration table
+     * Save name to migratsion table
      *
      */
     public function saveToMigarations() {

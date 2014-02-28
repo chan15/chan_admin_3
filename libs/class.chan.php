@@ -1856,7 +1856,7 @@ class chan {
      */
     public function migrate() {
         if (0 !== count($this->_columns)) {
-            // Creating table
+            // Create table
             if (true === $this->timestamp) {
                 $this->_columns['created_at'] = '`created_at` TIMESTAMP NULL DEFAULT NULL';
                 $this->_columns['updated_at'] = '`updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP';
@@ -1876,10 +1876,10 @@ class chan {
             }
         } else {
             if ('' === $this->column) {
-                // Executing sql
+                // Execute sql
                 $this->saveToMigarations();
             } else {
-                // Executing alter table
+                // Execute alter table
                 if (true === $this->sqlExecute($this->column)) {
                     $this->migrated = true;
                     $this->saveToMigarations();
@@ -1901,7 +1901,7 @@ class chan {
     }
 
     /**
-     * Check if migrations exist
+     * Check if migration exists
      *
      * @return mix
      */
@@ -1925,7 +1925,7 @@ class chan {
     }
 
     /**
-     * Save name to migratsion table
+     * Save name to migration table
      *
      */
     public function saveToMigarations() {

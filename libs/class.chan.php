@@ -1109,9 +1109,9 @@ class chan {
      */
     public function retUri($url = NULL) {
         if (NULL === $url) {
-            return 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            return str_replace('\\', '/', 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
         } else {
-            return 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . $url;
+            return str_replace('\\', '/', 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . $url);
         }
 
     }

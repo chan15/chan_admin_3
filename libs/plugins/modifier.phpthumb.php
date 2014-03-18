@@ -9,7 +9,7 @@
  * @param string $method (thumb|fit|square)
  * @return thumbnail
  */
-function smarty_modifier_phpthumb($file, $path,  $width = 0, $height = 0, $method = 'thumb') {
+function smarty_modifier_phpthumb($file, $path, $width = 0, $height = 0, $method = 'thumb') {
     $extension = pathinfo($file, PATHINFO_EXTENSION);
     $quality = 100;
     $pathSplit = explode('/', str_replace('../', '', $path));

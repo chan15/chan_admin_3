@@ -1,5 +1,6 @@
 <?php
-class chan {
+class chan
+{
     // Database variable
     public $charset          = 'UTF-8';
     public $host             = '';
@@ -74,7 +75,8 @@ class chan {
     public $timestamp = false;
     public $engine = 'innoDB';
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->host = DB_HOST;
         $this->db = DB_DB;
         $this->username = DB_USERNAME;
@@ -84,7 +86,8 @@ class chan {
     /**
      * Start Session
      */
-    public function sessionOn() {
+    public function sessionOn()
+    {
         if (!isset($_SESSION)) session_start();
     }
 
@@ -92,7 +95,8 @@ class chan {
      * Execute sql
      * @param string $sql SQL statement
      */
-    public function sqlExecute($sql) {
+    public function sqlExecute($sql)
+    {
         mysql_select_db($this->db, $this->conn);
 
         if (!mysql_query($sql, $this->conn)) {
@@ -108,7 +112,8 @@ class chan {
     /**
      * Connect to database
      */
-    public function connect() {
+    public function connect()
+    {
         $this->conn = mysql_connect($this->host, $this->username, $this->password) or trigger_error(mysql_error(), E_USER_ERROR);
         mysql_query("SET NAMES 'utf8'");
     }
@@ -122,7 +127,8 @@ class chan {
      * @param string $theNotDefinedValue value if not self defined
      * @return mixed
      */
-    public function toSql($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") {
+    public function toSql($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
+    {
       if (PHP_VERSION < 6) {
         $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
       }
@@ -157,7 +163,8 @@ class chan {
      * @param mixed $value filed value
      * @param string $type field type
      */
-    public function addField($field, $value, $type = 'text') {
+    public function addField($field, $value, $type = 'text')
+    {
         $this->fieldArray[] = '`' . $field . '`';
         $this->valueArray[] = $this->toSql($value, $type);
     }
@@ -168,7 +175,8 @@ class chan {
      * @param string $field field name
      * @return string
      **/
-    public function getFileName($field) {
+    public function getFileName($field)
+    {
         $sql = sprintf("SELECT %s FROM %s WHERE %s = %s",
                 $field,
                 $this->table,
@@ -182,7 +190,8 @@ class chan {
      * Delte file from database
      * @param string $path file path
      **/
-    public function dataFileDelete($path) {
+    public function dataFileDelete($path)
+    {
         if (count($this->fileDeleteArray) > 0) {
             if (is_dir($path)) {
                 foreach ($this->fileDeleteArray as $fileName) {
@@ -212,7 +221,8 @@ class chan {
      *
      * @return boolean
      */
-    public function dataInsert() {
+    public function dataInsert()
+    {
         $sqlIns = sprintf("INSERT INTO %s (%s) VALUES(%s)",
             $this->table,
             implode(', ', $this->fieldArray),
@@ -228,14 +238,15 @@ class chan {
      * @param string $where defined where condition
      * @return boolean
      */
-    public function dataUpdate($where = NULL) {
+    public function dataUpdate($where = null)
+    {
         $sqlString = array();
 
         foreach ($this->fieldArray as $k => $v) {
             $sqlString[] = $v . ' = ' . $this->valueArray[$k];
         }
 
-        if (NULL === $where) {
+        if (null === $where) {
             $where = sprintf("%s = %s",
                 $this->pk,
                 $this->toSql($this->pkValue, 'int'));
@@ -256,7 +267,8 @@ class chan {
      * @param string $where defined where condiion
      * @return boolean
      */
-    public function save($where = NULL) {
+    public function save($where = null)
+    {
         if ('' === $this->pkValue) {
             return $this->dataInsert();
         } else {
@@ -269,8 +281,9 @@ class chan {
      *
      * @param string $where defined where condition
      */
-    public function dataDelete($where = NULL) {
-        if (NULL === $where) {
+    public function dataDelete($where = null)
+    {
+        if (null === $where) {
             $where = sprintf("%s = %s",
                 $this->pk,
                 $this->toSql($this->pkValue, 'int'));
@@ -287,7 +300,8 @@ class chan {
     /**
      * Clear fields
      */
-    public function clearFields() {
+    public function clearFields()
+    {
         $this->pk = '';
         $this->pkValue = '';
         unset($this->fieldArray);
@@ -297,7 +311,8 @@ class chan {
     /**
      * Check source url
      */
-     public function checkSourceUrl() {
+    public function checkSourceUrl()
+    {
          if (false === stripos($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST'])) {
             die('Not the same domain');
          }
@@ -312,7 +327,8 @@ class chan {
      * @param integer $limit string max length
      * @param string $method form method
      */
-    public function addValidateField($name, $field, $type = 'text', $tableField = '', $limit = 0, $method = 'POST') {
+    public function addValidateField($name, $field, $type = 'text', $tableField = '', $limit = 0, $method = 'POST')
+    {
         array_push($this->validateArray,
             array(
                 'name'       => $name,
@@ -329,7 +345,8 @@ class chan {
      *
      * @return result
      */
-    public function serverValidate() {
+    public function serverValidate()
+    {
         $emailPattern = '/^\w+[\w\+\.\-]*@\w+(?:[\.\-]\w+)*\.\w+$/i';
         $numberPattern = '/[0-9]/';
         $positvePattern = '/^\d+$/';
@@ -397,7 +414,8 @@ class chan {
     /**
      * Show validate error message
      */
-    public function showValidateMessage() {
+    public function showValidateMessage()
+    {
         if (true === $this->validateError) {
             echo $this->meta;
             echo $this->validateMessage;
@@ -411,7 +429,8 @@ class chan {
      * @param string $sql sql statement
      * @return data|NULL
      */
-    public function myOneRow($sql) {
+    public function myOneRow($sql)
+    {
         mysql_select_db($this->db, $this->conn);
         $rec = mysql_query($sql, $this->conn) or die(mysql_error());
         $row = mysql_fetch_assoc($rec);
@@ -427,7 +446,7 @@ class chan {
                 $result[$name] = $row[$name];
             }
         } else {
-            $result = NULL;
+            $result = null;
         }
 
         mysql_free_result($rec);
@@ -438,9 +457,10 @@ class chan {
      * Get data
      *
      * @param string $sql sql statement
-     * @return data|NULL
+     * @return data|null
      */
-    public function myRow($sql) {
+    public function myRow($sql)
+    {
         mysql_select_db($this->db, $this->conn);
         $rec = mysql_query($sql, $this->conn) or die(mysql_error());
         $row = mysql_fetch_assoc($rec);
@@ -465,7 +485,7 @@ class chan {
                 array_push($result, $temp);
             } while($row = mysql_fetch_assoc($rec));
         } else {
-            $result = NULL;
+            $result = null;
         }
 
         mysql_free_result($rec);
@@ -479,13 +499,14 @@ class chan {
      * @param integer $max data per page
      * @return data
      */
-    public function myRowList($sql, $max = 10) {
+    public function myRowList($sql, $max = 10)
+    {
         $this->page = isset($_GET['page']) ? $_GET['page'] : 0;
         $startRow = $this->page * $max;
         $row = $this->myRow($sql);
 
-        if (NULL === $row) {
-            return NULL;
+        if (null === $row) {
+            return null;
         }
 
         $this->totalRecordCount = count($row);
@@ -502,7 +523,8 @@ class chan {
      * @param string $string combine string
      * @return string
      */
-    public function combineQueryString($string) {
+    public function combineQueryString($string)
+    {
         $result = '';
 
         if (!empty($_SERVER['QUERY_STRING'])) {
@@ -529,12 +551,13 @@ class chan {
      * @param integer $limit data per page
      * @return string
      */
-    public function pager($limit = 5) {
+    public function pager($limit = 5)
+    {
         $sep = '&nbsp;';
         $result = '';
-        $result .= $this->pageString('prev', NULL, 'prev') . $sep;
+        $result .= $this->pageString('prev', null, 'prev') . $sep;
         $result .= $this->pageNumber($limit) . $sep;
-        $result .= $this->pageString('next', NULL, 'next') . $sep;
+        $result .= $this->pageString('next', null, 'next') . $sep;
         return $result;
     }
 
@@ -544,7 +567,8 @@ class chan {
      * @param integer $limit data per page
      * @return string
      */
-    public function bootstrapPager($limit = 6) {
+    public function bootstrapPager($limit = 6)
+    {
         $currentPage = $_SERVER["PHP_SELF"];
         $result = '';
         $result .= '<ul class="pagination">';
@@ -608,14 +632,15 @@ class chan {
      * @param string $class css class name
      * @return string
      */
-    public function pageString($method, $string = NULL, $class = '') {
+    public function pageString($method, $string = null, $class = '')
+    {
         $currentPage = $_SERVER["PHP_SELF"];
         $result = '';
 
         switch ($method) {
             case 'first':
                 if ($this->page > 0) {
-                    if (NULL === $string) {
+                    if (null === $string) {
                         $string = $this->_langFirstPage;
                     }
                     $result = '<a href="' . sprintf("%s?page=%d%s",
@@ -627,7 +652,7 @@ class chan {
                 break;
             case 'prev':
                 if ($this->page > 0) {
-                    if (NULL === $string) {
+                    if (null === $string) {
                         $string = $this->_langPrevPage;
                     }
                     $result = '<a href="' . sprintf("%s?page=%d%s",
@@ -639,7 +664,7 @@ class chan {
                 break;
             case 'next':
                 if ($this->page < $this->totalPages) {
-                    if (NULL === $string) {
+                    if (null === $string) {
                         $string = $this->_langNextPage;
                     }
 
@@ -651,7 +676,7 @@ class chan {
                 break;
             case 'last':
                 if ($this->page < $this->totalPages) {
-                    if (NULL === $string) {
+                    if (null === $string) {
                         $string = $this->_langLastPage;
                     }
 
@@ -673,7 +698,8 @@ class chan {
      * @param string $set seperation
      * @return string
      */
-    public function pageNumber($limit = 5, $sep = '&nbsp;') {
+    public function pageNumber($limit = 5, $sep = '&nbsp;')
+    {
         $result = '';
         $currentPage = $_SERVER["PHP_SELF"];
         $limitLinksEndCount = $limit;
@@ -709,7 +735,8 @@ class chan {
      *
      * @param string url redirect page when logout
      */
-    public function logout($url = 'index.php') {
+    public function logout($url = 'index.php')
+    {
         $this->sessionOn();
         session_destroy();
 
@@ -726,7 +753,8 @@ class chan {
     /**
      * Save page to session as last visied page
      */
-    public function lastPage () {
+    public function lastPage ()
+    {
         $this->sessionOn();
         $_SESSION['lastPage'] = $this->retUri();
     }
@@ -736,7 +764,8 @@ class chan {
      *
      * @param string $url redirect url
      */
-    public function reUrl($url) {
+    public function reUrl($url)
+    {
         header(sprintf('Location: %s', $url));
     }
 
@@ -745,7 +774,8 @@ class chan {
      *
      * @param array $level level (array(1, 2, ...))
      */
-    public function loginLevel($level = array()) {
+    public function loginLevel($level = array())
+    {
         $this->sessionOn();
         $this->loginNeed();
 
@@ -760,7 +790,8 @@ class chan {
      *
      * @param string $url redirect page
      */
-    public function loginLimit($url = 'index.php') {
+    public function loginLimit($url = 'index.php')
+    {
         $this->sessionOn();
 
         if (isset($_SESSION['login'])) {
@@ -774,11 +805,12 @@ class chan {
      *
      * @param string $url login page
      */
-    public function loginNeed($url = NULL) {
+    public function loginNeed($url = null)
+    {
         $this->sessionOn();
         $this->lastPage();
 
-        if (NULL === $url) {
+        if (null === $url) {
             $url = $this->loginPage;
         }
 
@@ -793,7 +825,8 @@ class chan {
      * @param string $string alert string
      * @param string $url redirect url
      */
-    public function jsRedirect($string = NULL, $url = NULL) {
+    public function jsRedirect($string = null, $url = null)
+    {
         echo $this->meta;
         echo '<script>';
         echo 'alert("' . $string . '");';
@@ -811,9 +844,10 @@ class chan {
      * @param string $fileName file name
      * @param integer $width default excel column width
      **/
-    public function makeExcel($sql = '', $titles = array(), $fields = array(), $fileName = NULL, $width = 12) {
+    public function makeExcel($sql = '', $titles = array(), $fields = array(), $fileName = null, $width = 12)
+    {
         $class = dirname(__FILE__) . '/PHPExcel.php';
-        if (NULL === $fileName) {
+        if (null === $fileName) {
             $fileName = date('YmdHis') . rand(1000, 9999);
         }
 
@@ -855,7 +889,8 @@ class chan {
      * @param string $string string need to be convert
      * @return string
      */
-    public function convertEscape($string) {
+    public function convertEscape($string)
+    {
         return str_replace('/', '\/', str_replace('"', '\"', $string));
     }
 
@@ -865,7 +900,8 @@ class chan {
      * @param array $variables required variables
      * @param string $url redirect url
      */
-    public function reqVariable($variable = NULL, $url = 'index.php') {
+    public function reqVariable($variable = null, $url = 'index.php')
+    {
         if ('array' === gettype($variable)) {
             foreach ($variables as $value) {
                 if (!isset($_GET[$value]) || empty($_GET[$value])) {
@@ -886,7 +922,8 @@ class chan {
      *
      * @param integer $day cookie exist day
      */
-    public function tempCookieId($day = 7) {
+    public function tempCookieId($day = 7)
+    {
         $time = time() + 3600 * 24 * $day;
 
         if (!isset($_COOKIE['tempId'])) {
@@ -910,7 +947,8 @@ class chan {
      * n - Number of full minutes
      * s - Number of full seconds (default)
      */
-    public function dateDiff($interval, $datefrom, $dateto, $using_timestamps = false) {
+    public function dateDiff($interval, $datefrom, $dateto, $using_timestamps = false)
+    {
         if (!$using_timestamps) {
             $datefrom = strtotime($datefrom, 0);
             $dateto = strtotime($dateto, 0);
@@ -1005,7 +1043,8 @@ class chan {
      *
      * @param string $directory directory name
      */
-    public function makeDir($directory) {
+    public function makeDir($directory)
+    {
         if (!is_dir($directory)) {
             mkdir($directory, 0777);
         }
@@ -1014,7 +1053,8 @@ class chan {
     /**
      * Send email
      */
-    public function email() {
+    public function email()
+    {
         $class = dirname(__FILE__) . '/class.phpmailer.php';
         if (!file_exists($class)) {
             return 'Email class is not exist';
@@ -1044,7 +1084,8 @@ class chan {
      * @param string $date date string
      * @return string
      */
-    public function dateOnly($date) {
+    public function dateOnly($date)
+    {
         return date('Y-m-d', strtotime($date));
     }
 
@@ -1055,7 +1096,8 @@ class chan {
      * @param integer $length string length
      * @param string $symbol replace string
      */
-    public function cutStr($string, $length, $symbol = '...') {
+    public function cutStr($string, $length, $symbol = '...')
+    {
         mb_internal_encoding($this->charset);
         $string = trim(strip_tags($string));
 
@@ -1073,7 +1115,8 @@ class chan {
      * @param string $where where condition
      * @return data
      */
-    public function retData($fields = array(), $where = '') {
+    public function retData($fields = array(), $where = '')
+    {
         $fields = implode(', ', preg_replace('/^(.*?)$/', "`$1`", $fields));
         $sql = sprintf("SELECT %s FROM %s WHERE %s",
             $fields,
@@ -1088,7 +1131,8 @@ class chan {
      *
      * @return string
      */
-    public function retNow() {
+    public function retNow()
+    {
         return date('Y-m-d H:i:s');
     }
 
@@ -1097,7 +1141,8 @@ class chan {
      *
      * @return string
      */
-    public function retIp() {
+    public function retIp()
+    {
         return $_SERVER['REMOTE_ADDR'];
     }
 
@@ -1107,8 +1152,9 @@ class chan {
      * @param string $url combine url if assigned
      * @return string
      */
-    public function retUri($url = NULL) {
-        if (NULL === $url) {
+    public function retUri($url = null)
+    {
+        if (null === $url) {
             return str_replace('\\', '/', 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
         } else {
             return str_replace('\\', '/', 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . $url);
@@ -1123,13 +1169,14 @@ class chan {
      * @param string $where where condition
      * @return integer
      */
-    public function retMaxSort($sort, $where = '1 = 1') {
+    public function retMaxSort($sort, $where = '1 = 1')
+    {
         $sql = sprintf("SELECT MAX(%s) as `maxSort` FROM %s WHERE %s",
             '`' . $sort . '`',
             $this->table,
             $where);
         $row = $this->myOneRow($sql);
-        return (NULL === $row) ? 1 : intval($row['maxSort'] + 1);
+        return (null === $row) ? 1 : intval($row['maxSort'] + 1);
     }
 
     /**
@@ -1139,11 +1186,12 @@ class chan {
      * $text - 名稱
      * $name - 第一項標題
      */
-    public function retSmartyOption($data = NULL, $value, $text, $select = NULL) {
+    public function retSmartyOption($data = null, $value, $text, $select = null)
+    {
         $result = array();
 
-        if (NULL !== $data) {
-            if (NULL === $select) {
+        if (null !== $data) {
+            if (null === $select) {
                 $select = $this->_langSelect;
             }
 
@@ -1162,8 +1210,9 @@ class chan {
      *
      * @param string $message message to be show
      */
-    public function showMsg($message = NULL) {
-        if (NULL !== $message) {
+    public function showMsg($message = null)
+    {
+        if (null !== $message) {
             echo '<div style="border: 1px solid orange; text-align: center; background: #E1FDE3; padding: 4px; font-size: 14px; margin: 2px;">' . $message . '</div>';
         }
     }
@@ -1175,7 +1224,8 @@ class chan {
      * @param string $file file name
      * @return array
      **/
-    public function fileUpload($path = '/', $file = '') {
+    public function fileUpload($path = '/', $file = '')
+    {
         $class = dirname(__FILE__) . '/class.upload.php';
         $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
         $lang = file_exists($langFile) ? 'zh_TW' : '';
@@ -1213,7 +1263,8 @@ class chan {
      * @param string $file file name
      * @return array
      **/
-    public function imageUpload($path = '/', $img = '') {
+    public function imageUpload($path = '/', $img = '')
+    {
         $class = dirname(__FILE__) . '/class.upload.php';
         $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
         $lang = file_exists($langFile) ? 'zh_TW' : '';
@@ -1261,7 +1312,8 @@ class chan {
      * @param string $nameOnly return string when true
      * @return mixed
      */
-    public function fitThumb($dir, $img, $width = 0, $height = 0, $noFile = '', $nameOnly = false) {
+    public function fitThumb($dir, $img, $width = 0, $height = 0, $noFile = '', $nameOnly = false)
+    {
         $dir = str_replace(' ', '' , $dir);
         $thumbDir = $dir . 'thumbnails/';
         $class = dirname(__FILE__) . '/class.upload.php';
@@ -1347,7 +1399,8 @@ class chan {
      * @param string $nameOnly return string when true
      * @return mixed
      */
-    public function squareThumb($dir, $img, $ratio = 150, $noFile = '', $nameOnly = false) {
+    public function squareThumb($dir, $img, $ratio = 150, $noFile = '', $nameOnly = false)
+    {
         $dir = str_replace(' ', '' , $dir);
         $thumbDir = $dir . 'thumbnails/';
         $class = dirname(__FILE__) . '/class.upload.php';
@@ -1422,7 +1475,8 @@ class chan {
      * @param string $nameOnly return string when true
      * @return mixed
      */
-    public function thumb($dir, $img, $width = 0, $height = 0, $noFile = '', $nameOnly = false) {
+    public function thumb($dir, $img, $width = 0, $height = 0, $noFile = '', $nameOnly = false)
+    {
         $dir = str_replace(' ', '' , $dir);
         $thumbDir = $dir . 'thumbnails/';
         $class = dirname(__FILE__) . '/class.upload.php';
@@ -1520,7 +1574,8 @@ class chan {
      *
      * @param string $name column name
      */
-    public function increments($name) {
+    public function increments($name)
+    {
         $this->_columnName = $name;
         $this->_columns[$name] = sprintf("`%s` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT",
             $name);
@@ -1534,7 +1589,8 @@ class chan {
      * @param string $name column name
      * @param integer $length length
      */
-    public function string($name, $length = 255) {
+    public function string($name, $length = 255)
+    {
         if ('' !== $this->column) {
             $this->column .= sprintf(" VARCHAR(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
                 intval($name));
@@ -1553,7 +1609,8 @@ class chan {
      *
      * @param string $name column name
      */
-    public function text($name = NULL) {
+    public function text($name = null)
+    {
         if ('' !== $this->column) {
             $this->column .= " TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL";
         } else {
@@ -1571,7 +1628,8 @@ class chan {
      * @param string $name column name
      * @param array $value value
      */
-    public function enum($name, $value = array()) {
+    public function enum($name, $value = array())
+    {
         if ('' !== $this->column) {
             $this->column .= sprintf(" ENUM(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
                 "'" . implode("','", $name) . "'");
@@ -1591,7 +1649,8 @@ class chan {
      * @param string $name column name
      * @param integer $length length
      */
-    public function integer($name, $length = 0) {
+    public function integer($name, $length = 0)
+    {
         if ('' !== $this->column) {
             if (0 === intval($name)) {
                 $this->column .= ' INT UNSIGNED NOT NULL';
@@ -1621,7 +1680,8 @@ class chan {
      * @param string $name column name
      * @param integer $length length
      */
-    public function tinyint($name, $length = 0) {
+    public function tinyint($name, $length = 0)
+    {
         if ('' !== $this->column) {
             if (0 === intval($name)) {
                 $this->column .= " TINYINT UNSIGNED NOT NULL";
@@ -1650,7 +1710,8 @@ class chan {
      *
      * @param string $name column name
      */
-    public function boolean($name) {
+    public function boolean($name)
+    {
         if ('' !== $this->column) {
             $this->column .= ' TINYINT(1) UNSIGNED NOT NULL';
         } else {
@@ -1667,7 +1728,8 @@ class chan {
      *
      * @param string $name column name
      */
-    public function datetime($name) {
+    public function datetime($name)
+    {
         if ('' !== $this->column) {
             $this->column .= ' DATETIME NOT NULL';
         } else {
@@ -1684,7 +1746,8 @@ class chan {
      *
      * @param string $name filed name
      */
-    public function date($name) {
+    public function date($name)
+    {
         if ('' !== $this->column) {
             $this->column .= ' DATE NOT NULL';
         } else {
@@ -1701,7 +1764,8 @@ class chan {
      *
      * @param string $name filed name
      */
-    public function timestamp($name) {
+    public function timestamp($name)
+    {
         if ('' !== $this->column) {
             $this->column .= ' TIMESTAMP NOT NULL';
         } else {
@@ -1718,7 +1782,8 @@ class chan {
      *
      * @param string $name filed name
      */
-    public function index($name) {
+    public function index($name)
+    {
         $this->_indexes['index_' . $name] = sprintf("INDEX(`%s`)",
             $name);
     }
@@ -1727,7 +1792,8 @@ class chan {
      * Make column signed
      *
      */
-    public function signed() {
+    public function signed()
+    {
         if ('' !== $this->column) {
             $this->column = str_replace('UNSIGNED', 'SIGNED', $this->column);
         } else {
@@ -1738,10 +1804,11 @@ class chan {
     }
 
     /**
-     * Make column NULL
+     * Make column null
      *
      */
-    public function nullable() {
+    public function nullable()
+    {
         if ('' !== $this->column) {
             $this->column = str_replace('NOT NULL', 'NULL', $this->column);
         } else {
@@ -1756,8 +1823,9 @@ class chan {
      *
      * @param string $default default value
      */
-    public function defaultValue($default = NULL) {
-        if (NULL !== $default) {
+    public function defaultValue($default = null)
+    {
+        if (null !== $default) {
             if ('' !== $this->column) {
                 $this->column .= " DEFAULT '" . $default . "'";
             } else {
@@ -1773,7 +1841,8 @@ class chan {
      *
      * @param string name column name
      */
-    public function after($name) {
+    public function after($name)
+    {
         $this->column .= sprintf(" AFTER `%s`",
             $name);
 
@@ -1785,7 +1854,8 @@ class chan {
      *
      * @param string name column name
      */
-    public function dropColumn($name) {
+    public function dropColumn($name)
+    {
         $this->column = sprintf("ALTER TABLE `%s` DROP `%s`",
             $this->table,
             $name);
@@ -1796,7 +1866,8 @@ class chan {
      *
      * @param string name column name
      */
-    public function indexColumn($name) {
+    public function indexColumn($name)
+    {
         $this->column = sprintf("ALTER TABLE `%s` ADD INDEX(`%s`)",
             $this->table,
             $name);
@@ -1807,7 +1878,8 @@ class chan {
      *
      * @param string name column name
      */
-    public function addColumn($name) {
+    public function addColumn($name)
+    {
         $this->column = sprintf("ALTER TABLE `%s` ADD `%s`",
             $this->table,
             $name);
@@ -1820,7 +1892,8 @@ class chan {
      *
      * @param string name column name
      */
-    public function changeColumn($name, $newName) {
+    public function changeColumn($name, $newName)
+    {
         $this->column = sprintf("ALTER TABLE `%s` CHANGE `%s` `%s`",
             $this->table,
             $name,
@@ -1833,7 +1906,8 @@ class chan {
      * Drop table
      *
      */
-    public function dropTable() {
+    public function dropTable()
+    {
         $this->column = sprintf("DROP TABLE `%s`",
             $this->table);
     }
@@ -1844,7 +1918,8 @@ class chan {
      * @param string $name table name
      */
 
-    public function renameTable($name) {
+    public function renameTable($name)
+    {
         $this->column = sprintf("RENAME TABLE `%s` TO `%s`",
             $this->table,
             $name);
@@ -1854,7 +1929,8 @@ class chan {
      * Migrate
      *
      */
-    public function migrate() {
+    public function migrate()
+    {
         if (0 !== count($this->_columns)) {
             // Creating table
             if (true === $this->timestamp) {
@@ -1905,7 +1981,8 @@ class chan {
      *
      * @return mix
      */
-    public function checkMigrations() {
+    public function checkMigrations()
+    {
         if ('' === $this->migrationName) {
             $sql = "DESCRIBE `migrations`";
             $result = $this->sqlExecute($sql);
@@ -1928,7 +2005,8 @@ class chan {
      * Save name to migratsion table
      *
      */
-    public function saveToMigarations() {
+    public function saveToMigarations()
+    {
         $this->table = 'migrations';
         $this->addField('name', $this->migrationName);
         $this->addField('created_at', $this->retNow(), 'date');

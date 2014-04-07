@@ -501,7 +501,7 @@ class chan
      */
     public function myRowList($sql, $max = 10)
     {
-        $this->page = isset($_GET['page']) ? $_GET['page'] : 0;
+        $this->page = isset($_GET['page']) ? intval($_GET['page']) : 0;
         $startRow = $this->page * $max;
         $row = $this->myRow($sql);
 
@@ -591,16 +591,18 @@ class chan
                 $this->combineQueryString('page'));
         }
 
-        if ($endLink !== $temp) $startLink = max(1, intval(($endLink-$limitLinksEndCount + 1)));
+        if ($endLink !== $temp) {
+            $startLink = max(1, intval(($endLink-$limitLinksEndCount + 1)));
+        }
 
         for ($i = $startLink; $i <= $endLink; $i++) {
             $limitPageEndCount = $i - 1;
             if ($this->page !== $limitPageEndCount) {
                 $result .= sprintf('<li><a href="%s?page=%d%s">%s</a></li>',
-                $currentPage,
-                $limitPageEndCount,
-                $this->combineQueryString('page'),
-                $i);
+                    $currentPage,
+                    $limitPageEndCount,
+                    $this->combineQueryString('page'),
+                    $i);
             } else {
                 $result .= '<li class="disabled"><a>' . $i . '</a></li>';
             }
@@ -713,18 +715,18 @@ class chan
         }
 
         for ($i = $startLink; $i <= $endLink; $i++) {
-          $limitPageEndCount = intval($i - 1);
+            $limitPageEndCount = intval($i - 1);
 
-          if ($limitPageEndCount !== $this->page) {
-            $result .= sprintf('<a href="' . "%s?page=%d%s", $currentPage, $limitPageEndCount, $this->combineQueryString('page') . '">');
-            $result .= $i . '</a>';
-          } else {
-            $result .= '<strong>' . $i. '</strong>';
-          }
+            if ($limitPageEndCount !== $this->page) {
+                $result .= sprintf('<a href="' . "%s?page=%d%s", $currentPage, $limitPageEndCount, $this->combineQueryString('page') . '">');
+                $result .= $i . '</a>';
+            } else {
+                $result .= '<strong>' . $i . '</strong>';
+            }
 
-          if ($i !== $endLink) {
-              $result .= $sep;
-          }
+            if ($i !== $endLink) {
+                $result .= $sep;
+            }
         }
 
         return $result;

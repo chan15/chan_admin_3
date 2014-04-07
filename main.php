@@ -14,7 +14,7 @@ $smarty->config_dir = $path.'/configs/';
 $smarty->cache_dir = $path.'/cache/';
 
 include_once 'libs/class.chan.php';
-$chan = new chan;
+$chan = new Chan;
 
 $chan->host = DB_HOST;
 $chan->db = DB_DB;

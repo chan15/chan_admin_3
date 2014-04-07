@@ -1,5 +1,5 @@
 <?php
-class chan
+class Chan
 {
     // Database variable
     public $charset          = 'UTF-8';

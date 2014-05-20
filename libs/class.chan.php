@@ -1156,12 +1156,37 @@ class Chan
      */
     public function retUri($url = null)
     {
-        if (null === $url) {
-            return str_replace('\\', '/', 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
-        } else {
-            return str_replace('\\', '/', 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . $url);
+        $path = '';
+
+        if (true === isset($_SERVER['REQUEST_URI'])) {
+            $path = $_SERVER['REQUEST_URI'];
+            $path = pathinfo($path, PATHINFO_DIRNAME);
+            $path = str_replace('\\', '', $path);
         }
 
+        if (null === $url) {
+            return 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        } else {
+            return 'http://' . $_SERVER['HTTP_HOST'] . $path . '/' . $url;
+        }
+    }
+
+    /**
+     * Full url directory path
+     *
+     * @return string
+     */
+    public function retPath()
+    {
+        $path = '';
+
+        if (true === isset($_SERVER['REQUEST_URI'])) {
+            $path = $_SERVER['REQUEST_URI'];
+            $path = pathinfo($path, PATHINFO_DIRNAME);
+            $path = str_replace('\\', '', $path);
+        }
+
+        return 'http://' . $_SERVER['HTTP_HOST'] . $path . '/';
     }
 
     /**

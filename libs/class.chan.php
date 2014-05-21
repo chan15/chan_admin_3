@@ -1149,25 +1149,17 @@ class Chan
     }
 
     /**
-     * Current Uri
+     * Current uri
      *
      * @param string $url combine url if assigned
      * @return string
      */
     public function retUri($url = null)
     {
-        $path = '';
-
-        if (true === isset($_SERVER['REQUEST_URI'])) {
-            $path = $_SERVER['REQUEST_URI'];
-            $path = pathinfo($path, PATHINFO_DIRNAME);
-            $path = str_replace('\\', '', $path);
-        }
-
         if (null === $url) {
             return 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         } else {
-            return 'http://' . $_SERVER['HTTP_HOST'] . $path . '/' . $url;
+            return $this->retUriPath() . $url;
         }
     }
 
@@ -1176,14 +1168,12 @@ class Chan
      *
      * @return string
      */
-    public function retPath()
+    public function retUriPath()
     {
-        $path = '';
+        $path = pathinfo($_SERVER['PHP_SELF'], PATHINFO_DIRNAME);
 
-        if (true === isset($_SERVER['REQUEST_URI'])) {
-            $path = $_SERVER['REQUEST_URI'];
-            $path = pathinfo($path, PATHINFO_DIRNAME);
-            $path = str_replace('\\', '', $path);
+        if ('/' === $path) {
+            $path = '';
         }
 
         return 'http://' . $_SERVER['HTTP_HOST'] . $path . '/';

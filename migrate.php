@@ -4,7 +4,7 @@ $chan->connect();
 $chan->checkMigrations();
 
 $chan->migrationName = 'create_admins_table';
-if (NULL === $chan->checkMigrations()) {
+if (null === $chan->checkMigrations()) {
     $chan->table = 'admins';
     $chan->increments('id');
     $chan->string('name');
@@ -15,7 +15,7 @@ if (NULL === $chan->checkMigrations()) {
 }
 
 $chan->migrationName = 'insert_admin_default';
-if (NULL === $chan->checkMigrations()) {
+if (null === $chan->checkMigrations()) {
     $chan->table = 'admins';
     $chan->addField('name', 'admin');
     $chan->addField('password', 1234);

@@ -97,14 +97,17 @@ class Chan
      */
     public function sqlExecute($sql)
     {
-        mysql_select_db($this->db, $this->conn);
+        $this->connect();
 
-        if (!mysql_query($sql, $this->conn)) {
-            $this->sqlErrorMessage = mysql_error();
+        if (false === $this->conn->query($sql)) {
+            $this->sqlErrorMessage = $conn->error;
+
             return false;
         } else {
-            $this->lastInsertId = mysql_insert_id();
+            $this->lastInsertId = $this->conn->insert_id;
         }
+
+        $this->conn->close();
 
         return true;
     }
@@ -114,8 +117,8 @@ class Chan
      */
     public function connect()
     {
-        $this->conn = mysql_connect($this->host, $this->username, $this->password) or trigger_error(mysql_error(), E_USER_ERROR);
-        mysql_query("SET NAMES 'utf8'");
+        $this->conn = new mysqli($this->host, $this->username, $this->password, $this->db);
+        mysqli_set_charset($this->conn, 'utf8');
     }
 
     /**
@@ -183,6 +186,7 @@ class Chan
                 $this->pk,
                 $this->pkValue);
         $row = $this->myOneRow($sql);
+
         return $row[$field];
     }
 
@@ -229,6 +233,7 @@ class Chan
             implode(', ', $this->valueArray));
 
         $this->clearFields();
+
         return $this->sqlExecute($sqlIns);
     }
 
@@ -258,6 +263,7 @@ class Chan
             $where);
 
         $this->clearFields();
+
         return $this->sqlExecute($sqlUpdate);
     }
 
@@ -294,6 +300,7 @@ class Chan
             $where);
 
         $this->clearFields();
+
         return $this->sqlExecute($sqlDel);
     }
 
@@ -431,25 +438,12 @@ class Chan
      */
     public function myOneRow($sql)
     {
-        mysql_select_db($this->db, $this->conn);
-        $rec = mysql_query($sql, $this->conn) or die(mysql_error());
-        $row = mysql_fetch_assoc($rec);
-        $num = mysql_num_rows($rec);
-        $count = mysql_num_fields($rec);
-        $result = array();
+        $result = $this->myRow($sql);
 
-        if ($num > 0) {
-            $temp = array();
-
-            for ($i = 0; $i < $count; $i++) {
-                $name = mysql_field_name($rec, $i);
-                $result[$name] = $row[$name];
-            }
-        } else {
-            $result = null;
+        if (null !== $result) {
+            $result = current($result);
         }
 
-        mysql_free_result($rec);
         return $result;
     }
 
@@ -461,34 +455,38 @@ class Chan
      */
     public function myRow($sql)
     {
-        mysql_select_db($this->db, $this->conn);
-        $rec = mysql_query($sql, $this->conn) or die(mysql_error());
-        $row = mysql_fetch_assoc($rec);
-        $this->recordCount = mysql_num_rows($rec);
+        $this->connect();
+        $rec = $this->conn->query($sql);
+        $this->recordCount = $rec->num_rows;
 
         if ($this->makeRecordCount) {
             $this->totalRecordCount = $this->recordCount;
         }
 
-        $count = mysql_num_fields($rec);
-
         if ($this->recordCount > 0) {
+            $names = array();
             $result = array();
             $temp = array();
+            $count = $rec->field_count;
 
-            do {
-                for ($i = 0; $i < $count; $i++) {
-                    $name = mysql_field_name($rec, $i);
+            // Get fields name
+            while ($fields = mysqli_fetch_field($rec)) {
+                $names[] = $fields->name;
+            }
+
+            while ($row = $rec->fetch_assoc()) {
+                foreach ($names as $name) {
                     $temp[$name] = $row[$name];
                 }
 
                 array_push($result, $temp);
-            } while($row = mysql_fetch_assoc($rec));
+            }
         } else {
             $result = null;
         }
 
-        mysql_free_result($rec);
+        $this->conn->close();
+
         return $result;
     }
 
@@ -514,6 +512,7 @@ class Chan
         $sqlPages = sprintf("%s LIMIT %d, %d", $sql, $startRow, $max);
         $this->makeRecordCount = false;
         $row = $this->myRow($sqlPages);
+
         return $row;
     }
 
@@ -558,6 +557,7 @@ class Chan
         $result .= $this->pageString('prev', null, 'prev') . $sep;
         $result .= $this->pageNumber($limit) . $sep;
         $result .= $this->pageString('next', null, 'next') . $sep;
+
         return $result;
     }
 
@@ -1037,7 +1037,8 @@ class Chan
             $datediff = $difference;
             break;
         }
-            return $datediff;
+
+        return $datediff;
     }
 
     /**
@@ -1193,6 +1194,7 @@ class Chan
             $this->table,
             $where);
         $row = $this->myOneRow($sql);
+
         return (null === $row) ? 1 : intval($row['maxSort'] + 1);
     }
 

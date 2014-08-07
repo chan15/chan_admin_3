@@ -77,6 +77,7 @@ class Chan
 
     public function __construct()
     {
+        // Open connection
         $this->host = DB_HOST;
         $this->db = DB_DB;
         $this->username = DB_USERNAME;
@@ -88,6 +89,12 @@ class Chan
         } catch (PDOException $e) {
             die('連線發生錯誤');
         }
+    }
+
+    public function __destruct()
+    {
+        // Close connection
+        $this->dbh = null;
     }
 
     /**

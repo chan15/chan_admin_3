@@ -5,7 +5,7 @@ header('Content-type: text/html; charset=utf-8');
 include 'const.php';
 include 'config.php';
 
-include'libs/Smarty.class.php';
+include 'libs/Smarty.class.php';
 $smarty = new Smarty;
 
 $path = dirname(__FILE__);

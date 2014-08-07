@@ -7,7 +7,7 @@ class Chan
     public $db               = '';
     public $username         = '';
     public $password         = '';
-    public $conn             = '';
+    public $dbh              = '';
     public $makeRecordCount  = true;
     public $recordCount      = 0;
     public $totalRecordCount = 0;
@@ -81,6 +81,13 @@ class Chan
         $this->db = DB_DB;
         $this->username = DB_USERNAME;
         $this->password = DB_PASSWORD;
+
+        try {
+            $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->db;
+            $this->dbh = new PDO($dsn, $this->username, $this->password);
+        } catch (PDOException $e) {
+            die('連線發生錯誤');
+        }
     }
 
     /**
@@ -88,37 +95,26 @@ class Chan
      */
     public function sessionOn()
     {
-        if (!isset($_SESSION)) session_start();
+        if (false === isset($_SESSION)) session_start();
     }
 
     /**
      * Execute sql
      * @param string $sql SQL statement
      */
-    public function sqlExecute($sql)
+    public function sqlExecute($sql = null)
     {
-        $this->connect();
+        $result = $this->dbh->exec($sql);
 
-        if (false === $this->conn->query($sql)) {
-            $this->sqlErrorMessage = $conn->error;
-
+        if (false === $result) {
+            $errorMessage = $dbh->errorInfo();
+            $this->sqlErrorMessage = $errorMessage[2];
             return false;
         } else {
-            $this->lastInsertId = $this->conn->insert_id;
+             $this->lastInsertId = $this->dbh->lastInsertId();
         }
 
-        $this->conn->close();
-
         return true;
-    }
-
-    /**
-     * Connect to database
-     */
-    public function connect()
-    {
-        $this->conn = new mysqli($this->host, $this->username, $this->password, $this->db);
-        mysqli_set_charset($this->conn, 'utf8');
     }
 
     /**
@@ -453,41 +449,45 @@ class Chan
      * @param string $sql sql statement
      * @return data|null
      */
-    public function myRow($sql)
+    public function myRow($sql = null)
     {
-        $this->connect();
-        $rec = $this->conn->query($sql);
-        $this->recordCount = $rec->num_rows;
+        $result = $this->dbh->query($sql);
 
-        if ($this->makeRecordCount) {
+        if (false === $result) {
+            $errorMessage = $dbh->errorInfo();
+            die($errorMessage[2]);
+        }
+
+        $this->recordCount = $result->rowCount();
+
+        if (true === $this->makeRecordCount) {
             $this->totalRecordCount = $this->recordCount;
         }
 
         if ($this->recordCount > 0) {
             $names = array();
-            $result = array();
+            $results = array();
             $temp = array();
-            $count = $rec->field_count;
+            $columnCount = $result->columnCount();
 
             // Get fields name
-            while ($fields = mysqli_fetch_field($rec)) {
-                $names[] = $fields->name;
+            for ($i = 0; $i < $columnCount; $i++) {
+                $meta = $result->getColumnMeta($i);
+                $columnNames[] = $meta['name'];
             }
 
-            while ($row = $rec->fetch_assoc()) {
-                foreach ($names as $name) {
-                    $temp[$name] = $row[$name];
+            while ($row = $result->fetch()) {
+                foreach ($columnNames as $columnName) {
+                    $temp[$columnName] = $row[$columnName];
                 }
 
-                array_push($result, $temp);
+                array_push($results, $temp);
             }
         } else {
-            $result = null;
+            $results = null;
         }
 
-        $this->conn->close();
-
-        return $result;
+        return $results;
     }
 
     /**

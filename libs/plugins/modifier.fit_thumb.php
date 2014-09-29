@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Make fit thumbnail
  *
@@ -14,4 +15,3 @@ function smarty_modifier_fit_thumb($src, $path = '/', $width = 100, $height = 10
     global $chan;
 	return $chan->fitThumb($path, $src, $width, $height, $noFile, $nameOnly);
 }
-?>

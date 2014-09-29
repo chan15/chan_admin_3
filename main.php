@@ -4,8 +4,8 @@ error_reporting(0);
 header('Content-type: text/html; charset=utf-8');
 include 'const.php';
 include 'config.php';
+include 'vendor/autoload.php';
 
-include 'libs/Smarty.class.php';
 $smarty = new Smarty;
 
 $path = dirname(__FILE__);
@@ -14,7 +14,7 @@ $smarty->compile_dir = $path . '/templates_c/';
 $smarty->config_dir = $path . '/configs/';
 $smarty->cache_dir = $path . '/cache/';
 
-include_once 'libs/class.chan.php';
+include 'libs/class.chan.php';
 $chan = new Chan;
 
 $chan->host = DB_HOST;

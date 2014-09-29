@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Make square thumbnail
  *
@@ -12,4 +13,3 @@ function smarty_modifier_square_thumb($src, $path = '/', $ratio = 100, $noFile =
     global $chan;
 	return $chan->squareThumb($path, $src, $ratio, $noFile, $nameOnly);
 }
-?>

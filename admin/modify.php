@@ -14,12 +14,11 @@ $smarty->assign('path', $path);
 $fileField = array();
 $fileRealField = array();
 $haveUpload = false;
-$isAdd = (isset($_POST['id'])) ? false : true;
+$isAdd = (true === isset($_POST['id'])) ? false : true;
 $chan->imageUploadRatio = 600;
-$chan->connect();
 
 // Ajax modify
-if (isset($_POST['modify'])) {
+if (true === isset($_POST['modify'])) {
 	$chan->checkSourceUrl();
 	$chan->table = $tableName;
 	$chan->addValidateField('名稱', 'name');
@@ -71,7 +70,7 @@ if (isset($_POST['modify'])) {
 }
 
 // load data
-if (isset($_GET['id'])) {
+if (true === isset($_GET['id'])) {
 	$sql = sprintf("SELECT * FROM `%s` WHERE `id` = %s",
 		$tableName,
 		$chan->toSql($_GET['id'], 'int'));

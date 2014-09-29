@@ -1,5 +1,5 @@
 <?php
-if (!isset($_SESSION['admin'])) {
+
+if (false === isset($_SESSION['admin'])) {
     $chan->reUrl('index.php');
 }
-?>

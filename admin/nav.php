@@ -1,6 +1,8 @@
 <?php
-include_once '../libs/simple_html_dom.php';
-$html = file_get_html('nav.xml');
+
+use Sunra\PhpSimple\HtmlDomParser;
+
+$html = HtmlDomParser::file_get_html('nav.xml');
 $navStr = '';
 $mainCss = '';
 
@@ -33,7 +35,7 @@ foreach($html->find('main') as $main) {
 			$main->find('title', 0)->plaintext);
 	}
 }
+
 $html->clear();
 
 $smarty->assign('nav', $navStr);
-?>

@@ -1,0 +1,9 @@
+{
+    "require": {
+        "smarty/smarty": "dev-trunk",
+        "claymm/verot-upload": "dev-master",
+        "maatwebsite/excel": "dev-master",
+        "sunra/php-simple-html-dom-parser": "dev-master",
+        "swiftmailer/swiftmailer": "5.3.*@dev"
+    }
+}

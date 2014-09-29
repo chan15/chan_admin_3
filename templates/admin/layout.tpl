@@ -24,7 +24,6 @@
     <script src="ckeditor/adapters/jquery.js" type="text/javascript"></script>
     <script src="js/initial.js" type="text/javascript"></script>
     {block name="javascript"}{/block}
-{$incJs}
 </head>
 <body>
     {include file="admin/modal.tpl"}

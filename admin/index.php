@@ -1,7 +1,7 @@
 <?php
 include '../main.php';
 
-if (isset($_POST['login'])) {
+if (true === isset($_POST['login'])) {
     $chan->checkSourceUrl();
     $username = @$_POST['username'];
     $password = @$_POST['password'];
@@ -9,13 +9,12 @@ if (isset($_POST['login'])) {
     $message = '';
 
     if ('' !== $username && '' !== $password) {
-        $chan->connect();
         $sql = sprintf("SELECT * FROM `admins` WHERE `username` = %s AND `password` = %s",
             $chan->toSql($username, 'text'),
             $chan->toSql($password, 'text'));
         $row = $chan->myOneRow($sql);
 
-        if (!$row) {
+        if (null === $row) {
             $status = 'fail';
             $message = '查無資料';
         } else {

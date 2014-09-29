@@ -47,6 +47,7 @@ class Chan
     public $imageUploadRatio   = 1000;
     public $imageUploadAllowed = array('image/*');
     public $imageUploadSize    = 2097152;
+    public $imageLang          = 'zh_TW';
 
     // File variable
     public $fileUploadAllowed = array('image/*, application/*, archives/zip');
@@ -89,6 +90,9 @@ class Chan
         } catch (PDOException $e) {
             die('連線發生錯誤');
         }
+
+        $path = dirname(dirname(__FILE__)) . '\vendor\claymm\verot-upload\lib\Upload.php';
+        include $path;
     }
 
     public function __destruct()
@@ -114,7 +118,7 @@ class Chan
         $result = $this->dbh->exec($sql);
 
         if (false === $result) {
-            $errorMessage = $dbh->errorInfo();
+            $errorMessage = $this->dbh->errorInfo();
             $this->sqlErrorMessage = $errorMessage[2];
             return false;
         } else {
@@ -406,7 +410,7 @@ class Chan
                     default: $pattern = '';
                 }
 
-                if (!empty($pattern) && !preg_match($pattern, $value)) {
+                if (false === empty($pattern) && false === preg_match($pattern, $value)) {
                     $this->validateMessage .= $name . $this->_langFormatInvalid . '<br>';
                     $this->validateError = true;
                 } else {
@@ -461,7 +465,7 @@ class Chan
         $result = $this->dbh->query($sql);
 
         if (false === $result) {
-            $errorMessage = $dbh->errorInfo();
+            $errorMessage = $this->dbh->errorInfo();
             die($errorMessage[2]);
         }
 
@@ -533,12 +537,12 @@ class Chan
     {
         $result = '';
 
-        if (!empty($_SERVER['QUERY_STRING'])) {
+        if (false === empty($_SERVER['QUERY_STRING'])) {
             $params = explode('&', $_SERVER['QUERY_STRING']);
             $newParams = array();
 
             foreach ($params as $param) {
-               if (!stristr($param, $string)) {
+               if (false === stristr($param, $string)) {
                    array_push($newParams, $param);
                }
             }
@@ -788,7 +792,7 @@ class Chan
         $this->sessionOn();
         $this->loginNeed();
 
-        if(!in_array(@$_SESSION['level'], $level)) {
+        if(false === in_array(@$_SESSION['level'], $level)) {
             $this->reUrl($this->loginPage);
         }
     }
@@ -823,7 +827,7 @@ class Chan
             $url = $this->loginPage;
         }
 
-        if (!isset($_SESSION['login'])) {
+        if (false === isset($_SESSION['login'])) {
             $this->reUrl($url);
         }
     }
@@ -855,41 +859,35 @@ class Chan
      **/
     public function makeExcel($sql = '', $titles = array(), $fields = array(), $fileName = null, $width = 12)
     {
-        $class = dirname(__FILE__) . '/PHPExcel.php';
         if (null === $fileName) {
             $fileName = date('YmdHis') . rand(1000, 9999);
         }
 
-        if (file_exists($class)) {
-            include_once $class;
-            $query = $this->myRow($sql);
-            $excel = new PHPExcel();
-            $excel->setActiveSheetIndex(0);
-            $excel->getActiveSheet()->getDefaultColumnDimension()->setWidth($width);
-            $type = PHPExcel_Cell_DataType::TYPE_STRING;
+        $query = $this->myRow($sql);
+        $excel = new PHPExcel;
+        $excel->setActiveSheetIndex(0);
+        $excel->getActiveSheet()->getDefaultColumnDimension()->setWidth($width);
+        $type = PHPExcel_Cell_DataType::TYPE_STRING;
 
-            foreach ($titles as $k => $v) {
-                $excel->getActiveSheet()->setCellValueByColumnAndRow($k, 1, $v);
-            }
-
-            $rowIndex = 2;
-            if ($query) {
-                foreach ($query as $row) {
-                    foreach ($fields as $k => $v) {
-                        $excel->getActiveSheet()->getCellByColumnAndRow($k, $rowIndex)->setValueExplicit($row[$v], $type);
-                    }
-                    $rowIndex++;
-                }
-            }
-
-            header('Content-Type: application/vnd.ms-excel');
-            header('Content-Disposition: attachment;filename="'.$fileName.'.xls"');
-            header('Cache-Control: max-age=0');
-            $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
-            $writer->save('php://output');
-        } else {
-            die('Excel class is not exist');
+        foreach ($titles as $k => $v) {
+            $excel->getActiveSheet()->setCellValueByColumnAndRow($k, 1, $v);
         }
+
+        $rowIndex = 2;
+        if ($query) {
+            foreach ($query as $row) {
+                foreach ($fields as $k => $v) {
+                    $excel->getActiveSheet()->getCellByColumnAndRow($k, $rowIndex)->setValueExplicit($row[$v], $type);
+                }
+                $rowIndex++;
+            }
+        }
+
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="'.$fileName.'.xls"');
+        header('Cache-Control: max-age=0');
+        $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+        $writer->save('php://output');
     }
 
     /**
@@ -913,13 +911,13 @@ class Chan
     {
         if ('array' === gettype($variable)) {
             foreach ($variables as $value) {
-                if (!isset($_GET[$value]) || empty($_GET[$value])) {
+                if (false === isset($_GET[$value]) || empty($_GET[$value])) {
                     $this->jsRedirect($this->_langUrlError, $url);
                     break;
                 }
             }
         } else {
-            if (!isset($_GET[$variable]) || empty($_GET[$variable])) {
+            if (false === isset($_GET[$variable]) || empty($_GET[$variable])) {
                 $this->jsRedirect($this->_langUrlError, $url);
                 break;
             }
@@ -935,7 +933,7 @@ class Chan
     {
         $time = time() + 3600 * 24 * $day;
 
-        if (!isset($_COOKIE['tempId'])) {
+        if (false === isset($_COOKIE['tempId'])) {
             setcookie('tempId', uniqid() . rand(10000, 99999), $time);
         }
     }
@@ -958,7 +956,7 @@ class Chan
      */
     public function dateDiff($interval, $datefrom, $dateto, $using_timestamps = false)
     {
-        if (!$using_timestamps) {
+        if (false === $using_timestamps) {
             $datefrom = strtotime($datefrom, 0);
             $dateto = strtotime($dateto, 0);
         }
@@ -1055,7 +1053,7 @@ class Chan
      */
     public function makeDir($directory)
     {
-        if (!is_dir($directory)) {
+        if (false === is_dir($directory)) {
             mkdir($directory, 0777);
         }
     }
@@ -1063,29 +1061,17 @@ class Chan
     /**
      * Send email
      */
-    public function email()
+    public function sendMail()
     {
-        $class = dirname(__FILE__) . '/class.phpmailer.php';
-        if (!file_exists($class)) {
-            return 'Email class is not exist';
-        }
+        $transport = Swift_MailTransport::newInstance();
+        $mailer = Swift_Mailer::newInstance($transport);
+        $message = Swift_Message::newInstance($this->emailSubject)
+          ->setFrom(array($this->emailFrom => $this->emailFromName))
+          ->setTo(array($this->emailTo))
+          ->setBody($this->emailContent);
+        $result = $mailer->send($message);
 
-        include_once($class);
-        $mail = new PHPMailer();
-        $mail->CharSet = "UTF-8";
-        $mail->Encoding = "base64";
-        $mail->IsHTML(true);
-        $mail->FromName = $this->emailFromName;
-        $mail->From = $this->emailFrom;
-        $mail->Subject = $this->emailSubject;
-        $mail->Body = $this->emailContent;
-        $mail->AddAddress($this->emailTo);
-
-        if (!$mail->Send() && $this->emailDebug) {
-            return $mail->ErrorInfo;
-        } else {
-            return true;
-        }
+        return $result;
     }
 
     /**
@@ -1252,25 +1238,16 @@ class Chan
      **/
     public function fileUpload($path = '/', $file = '')
     {
-        $class = dirname(__FILE__) . '/class.upload.php';
-        $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
-        $lang = file_exists($langFile) ? 'zh_TW' : '';
         $error ='';
         $imgName = '';
+        $fileName = date('YmdHis') . rand(1000, 9999);
+        $handle = new upload($_FILES[$file], $this->imageLang);
+        $handle->file_new_name_body = $fileName;
+        $handle->file_max_size = $this->fileUploadSize;
+        $handle->process($path);
 
-        if (!file_exists($class)) {
-            $error = 'Upload class is not exist';
-        } else {
-            include_once $class;
-            $fileName = date('YmdHis') . rand(1000, 9999);
-            $handle = new upload($_FILES[$file], $lang);
-            $handle->file_new_name_body = $fileName;
-            $handle->file_max_size = $this->fileUploadSize;
-            $handle->process($path);
-
-            if (!$handle->processed) {
-                $error = $handle->error;
-            }
+        if (false === $handle->processed) {
+            $error = $handle->error;
         }
 
         return array(
@@ -1291,32 +1268,23 @@ class Chan
      **/
     public function imageUpload($path = '/', $img = '')
     {
-        $class = dirname(__FILE__) . '/class.upload.php';
-        $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
-        $lang = file_exists($langFile) ? 'zh_TW' : '';
         $error ='';
         $imgName = '';
+        $imgName = date('YmdHis') . rand(1000, 9999);
+        $handle = new upload($_FILES[$img], $this->imageLang);
+        $handle->file_new_name_body = $imgName;
+        $handle->file_max_size = $this->imageUploadSize;
+        $handle->allowed = $this->imageUploadAllowed;
+        $handle->jpeg_quality = 100;
+        $handle->image_resize = true;
+        $handle->image_x = $this->imageUploadRatio;
+        $handle->image_y = $this->imageUploadRatio;
+        $handle->image_ratio = true;
+        $handle->image_ratio_no_zoom_in = true;
+        $handle->process($path);
 
-        if (!file_exists($class)) {
-            $error = 'Upload class is not exist';
-        } else {
-            include_once $class;
-            $imgName = date('YmdHis') . rand(1000, 9999);
-            $handle = new upload($_FILES[$img], $lang);
-            $handle->file_new_name_body = $imgName;
-            $handle->file_max_size = $this->imageUploadSize;
-            $handle->allowed = $this->imageUploadAllowed;
-            $handle->jpeg_quality = 100;
-            $handle->image_resize = true;
-            $handle->image_x = $this->imageUploadRatio;
-            $handle->image_y = $this->imageUploadRatio;
-            $handle->image_ratio = true;
-            $handle->image_ratio_no_zoom_in = true;
-            $handle->process($path);
-
-            if (!$handle->processed) {
-                $error = $handle->error;
-            }
+        if (false === $handle->processed) {
+            $error = $handle->error;
         }
 
         return array(
@@ -1342,9 +1310,6 @@ class Chan
     {
         $dir = str_replace(' ', '' , $dir);
         $thumbDir = $dir . 'thumbnails/';
-        $class = dirname(__FILE__) . '/class.upload.php';
-        $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
-        $lang = file_exists($langFile) ? 'zh_TW' : '';
         $body = pathinfo($img, PATHINFO_FILENAME);
         $ext = pathinfo($img, PATHINFO_EXTENSION);
         $thumbBody = sprintf('%s_%sx%s_fit',
@@ -1357,27 +1322,23 @@ class Chan
             $noFile = $this->_langFileNotExist;
         }
 
-        if (!file_exists($class)) {
-            die('Image class is not exist');
-        }
-
-        if (!file_exists($dir . $img) || '' === $img) {
+        if (false === file_exists($dir . $img) || '' === $img) {
             return $noFile;
         }
 
-        if (file_exists($thumbName)) {
+        if (true === file_exists($thumbName)) {
             if (true === $nameOnly) {
                 return $thumbName;
             } else {
                 list($width, $height) = getimagesize($thumbName);
+
                 return sprintf('<img src="%s" width="%s" height="%s">',
                     $thumbName,
                     $width,
                     $height);
             }
         } else {
-            include_once($class);
-            $foo = new upload($dir . $img, $lang);
+            $foo = new Upload($dir . $img, $this->imageLang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
@@ -1398,8 +1359,8 @@ class Chan
 
             $foo->process($thumbDir);
 
-            if ($foo->processed) {
-                if ($nameOnly) {
+            if (true === $foo->processed) {
+                if (true === $nameOnly) {
                     return $thumbName;
                 } else {
                     return sprintf('<img src="%s" width="%s" height="%s">',
@@ -1408,7 +1369,7 @@ class Chan
                         $foo->image_dst_y);
                 }
             } else {
-                if ($this->thumbDebug) {
+                if (true === $this->thumbDebug) {
                     return $foo->error;
                 }
             }
@@ -1429,9 +1390,6 @@ class Chan
     {
         $dir = str_replace(' ', '' , $dir);
         $thumbDir = $dir . 'thumbnails/';
-        $class = dirname(__FILE__) . '/class.upload.php';
-        $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
-        $lang = file_exists($langFile) ? 'zh_TW' : '';
         $body = pathinfo($img, PATHINFO_FILENAME);
         $ext = pathinfo($img, PATHINFO_EXTENSION);
         $thumbBody = sprintf('%s_%s_square',
@@ -1443,16 +1401,12 @@ class Chan
             $noFile = $this->_langFileNotExist;
         }
 
-        if (!file_exists($class)) {
-            die('Image class is not exist');
-        }
-
-        if (!file_exists($dir . $img) || '' === $img) {
+        if (false === file_exists($dir . $img) || '' === $img) {
             return $noFile;
         }
 
-        if (file_exists($thumbName)) {
-            if ($nameOnly) {
+        if (true === file_exists($thumbName)) {
+            if (true === $nameOnly) {
                 return $thumbName;
             } else {
                 return sprintf('<img src="%s" width="%s" height="%s">',
@@ -1461,8 +1415,7 @@ class Chan
                     $ratio);
             }
         } else {
-            include_once($class);
-            $foo = new upload($dir . $img, $lang);
+            $foo = new upload($dir . $img, $this->imageLang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
@@ -1473,8 +1426,8 @@ class Chan
             $foo->image_ratio = 'true';
             $foo->process($thumbDir);
 
-            if ($foo->processed) {
-                if ($nameOnly) {
+            if (true === $foo->processed) {
+                if (true === $nameOnly) {
                     return $thumbName;
                 } else {
                     return sprintf('<img src="%s" width="%s" height="%s">',
@@ -1483,7 +1436,7 @@ class Chan
                         $ratio);
                 }
             } else {
-                if ($this->thumbDebug) {
+                if (true === $this->thumbDebug) {
                     return $foo->error;
                 }
             }
@@ -1491,7 +1444,7 @@ class Chan
     }
 
     /**
-     * Make thubnail
+     * Make thumbnail
      *
      * @param string $dir directory
      * @param string $img image name
@@ -1505,9 +1458,6 @@ class Chan
     {
         $dir = str_replace(' ', '' , $dir);
         $thumbDir = $dir . 'thumbnails/';
-        $class = dirname(__FILE__) . '/class.upload.php';
-        $langFile = dirname(__FILE__) . '/lang/class.upload.zh_TW.php';
-        $lang = file_exists($langFile) ? 'zh_TW' : '';
         $body = pathinfo($img, PATHINFO_FILENAME);
         $ext = pathinfo($img, PATHINFO_EXTENSION);
         $thumbBody = sprintf('%s_%sx%s_thumb',
@@ -1520,15 +1470,11 @@ class Chan
             $noFile = $this->_langFileNotExist;
         }
 
-        if (!file_exists($class)) {
-            die('Image class is not exist');
-        }
-
-        if (!file_exists($dir . $img) || '' === $img) {
+        if (false === file_exists($dir . $img) || '' === $img) {
             return $noFile;
         }
 
-        if (file_exists($thumbName)) {
+        if (true === file_exists($thumbName)) {
             if (true === $nameOnly) {
                 return $thumbName;
             } else {
@@ -1540,7 +1486,7 @@ class Chan
             }
         } else {
             include_once($class);
-            $foo = new upload($dir . $img, $lang);
+            $foo = new upload($dir . $img, $this->imageLang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
@@ -1560,7 +1506,7 @@ class Chan
 
             $foo->process($thumbDir);
 
-            if ($foo->processed) {
+            if (true === $foo->processed) {
                 if (true === $nameOnly) {
                     return $thumbName;
                 } else {
@@ -1570,7 +1516,7 @@ class Chan
                         $foo->image_dst_y);
                 }
             } else {
-                if ($this->thumbDebug) {
+                if (true === $this->thumbDebug) {
                     return $foo->error;
                 }
             }

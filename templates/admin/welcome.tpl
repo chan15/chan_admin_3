@@ -1,4 +1,5 @@
 {extends file="admin/layout.tpl"}
+
 {block name="content"}
     <div class="container">
         <div class="row">

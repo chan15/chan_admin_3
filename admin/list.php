@@ -11,12 +11,11 @@ include 'options.php';
 $smarty->assign('yesNoSearchOption', $yesNoSearchOption);
 $smarty->assign('yesNoListOption', $yesNoListOption);
 $smarty->assign('pageLimitOption', $pageLimitOption);
-$limit = isset($_GET['limit']) ? $_GET['limit'] : 20;
+$limit = (true === isset($_GET['limit'])) ? $_GET['limit'] : 20;
 $smarty->assign('limit', $limit);
-$chan->connect();
 
-$name = (isset($_GET['name']) && '' !== $_GET['name']) ? '%' . $_GET['name'] . '%' : '%%%';
-$on = (isset($_GET['on']) && '' !== $_GET['on']) ? '%' . $_GET['on'] . '%' : '%%%';
+$name = (true === isset($_GET['name']) && '' !== $_GET['name']) ? '%' . $_GET['name'] . '%' : '%%%';
+$on = (true === isset($_GET['on']) && '' !== $_GET['on']) ? '%' . $_GET['on'] . '%' : '%%%';
 
 $sql = sprintf("SELECT *
     FROM `%s`

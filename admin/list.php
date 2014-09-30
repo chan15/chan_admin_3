@@ -19,11 +19,11 @@ $on = (true === isset($_GET['on']) && '' !== $_GET['on']) ? '%' . $_GET['on'] . 
 
 $sql = sprintf("SELECT *
     FROM `%s`
-    WHERE `name` LIKE %s AND `on` LIKE %s
+    WHERE `name` LIKE ? AND `on` LIKE ?
     ORDER BY `id` DESC",
-    $tableName,
-    $chan->toSql($name, 'text'),
-    $chan->toSql($on, 'text'));
+    $tableName);
+$chan->addValue($name);
+$chan->addValue($on);
 $row = $chan->myRowList($sql, $limit);
 
 $smarty->assign('tableField', $tableName); // table field

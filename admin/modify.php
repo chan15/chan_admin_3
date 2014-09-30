@@ -71,9 +71,9 @@ if (true === isset($_POST['modify'])) {
 
 // load data
 if (true === isset($_GET['id'])) {
-	$sql = sprintf("SELECT * FROM `%s` WHERE `id` = %s",
-		$tableName,
-		$chan->toSql($_GET['id'], 'int'));
+	$sql = sprintf("SELECT * FROM `%s` WHERE `id` = ?",
+		$tableName);
+    $chan->addValue($_GET['id'], 'int');
 	$row = $chan->myOneRow($sql);
 	$smarty->assign('data', $row);
 }

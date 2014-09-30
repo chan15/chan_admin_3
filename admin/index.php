@@ -9,9 +9,9 @@ if (true === isset($_POST['login'])) {
     $message = '';
 
     if ('' !== $username && '' !== $password) {
-        $sql = sprintf("SELECT * FROM `admins` WHERE `username` = %s AND `password` = %s",
-            $chan->toSql($username, 'text'),
-            $chan->toSql($password, 'text'));
+        $sql = 'SELECT * FROM `admins` WHERE `username` = ? AND `password` = ?';
+            $chan->addValue($username);
+            $chan->addValue($password);
         $row = $chan->myOneRow($sql);
 
         if (null === $row) {

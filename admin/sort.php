@@ -1,7 +1,7 @@
 <?php
+
 include_once '../main.php';
 $chan->checkSourceUrl();
-$chan->connect();
 
 $tableField = @$_POST['tableField'];
 $idSerial   = @$_POST['idSerial'];
@@ -11,18 +11,19 @@ if ('' === $idSerial && '' === $sortSerial) {
     exit;
 }
 
-$idArr   = explode(',', $idSerial);
-$sortArr = explode(',', $sortSerial);
+$ids   = explode(',', $idSerial);
+$sorts = explode(',', $sortSerial);
 
-if (count($idArr) != count($sortArr)) {
+if (count($ids) != count($sorts)) {
     exit;
 }
 
 // start update sort
 $chan->table = $tableField;
-foreach ($idArr as $k => $id) {
+
+foreach ($ids as $index => $id) {
     $chan->pk = 'id';
     $chan->pkValue = $id;
-    $chan->addField('sort', $sortArr[$k], 'int');
-    $chan->dataUpdate();
+    $chan->addField('sort', $sorts[$index], 'int');
+    $chan->save();
 }

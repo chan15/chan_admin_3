@@ -18,6 +18,14 @@ class Chan
     public $table            = '';
     public $pk               = '';
     public $pkValue          = '';
+    private $_paramType = array(
+        'bool' => PDO::PARAM_BOOL,
+        'null' => PDO::PARAM_NULL,
+        'int'  => PDO::PARAM_INT,
+        'str'  => PDO::PARAM_STR,
+        'lob'  => PDO::PARAM_LOB,
+        'lob'  => PDO::PARAM_LOB,
+    );
 
     // Email variable
     public $emailDebug    = false;
@@ -112,59 +120,23 @@ class Chan
     /**
      * Execute sql
      * @param string $sql SQL statement
+     *
+     * @return boolean
      */
     public function sqlExecute($sql = null)
     {
-        $result = $this->dbh->exec($sql);
+        $result = $this->dbh->prepare($sql);
 
-        if (false === $result) {
+        if (false === $result->execute()) {
             $errorMessage = $this->dbh->errorInfo();
             $this->sqlErrorMessage = $errorMessage[2];
             return false;
-        } else {
-             $this->lastInsertId = $this->dbh->lastInsertId();
         }
 
+        $this->lastInsertId = $this->dbh->lastInsertId();
+        $this->clearFields();
+
         return true;
-    }
-
-    /**
-     * Prevent Sql Injection
-     *
-     * @param string $theValue Value
-     * @param string $type Sql Type
-     * @param string $theDefinedValue value self defined
-     * @param string $theNotDefinedValue value if not self defined
-     * @return mixed
-     */
-    public function toSql($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-    {
-      if (PHP_VERSION < 6) {
-        $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
-      }
-
-      $theValue = mysql_real_escape_string($theValue);
-
-      switch ($theType) {
-        case "text":
-          $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-          break;
-        case "long":
-        case "int":
-          $theValue = ($theValue != "") ? intval($theValue) : "NULL";
-          break;
-        case "double":
-          $theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-          break;
-        case "date":
-          $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-          break;
-        case "defined":
-          $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-          break;
-      }
-
-      return $theValue;
     }
 
     /**
@@ -173,10 +145,15 @@ class Chan
      * @param mixed $value filed value
      * @param string $type field type
      */
-    public function addField($field, $value, $type = 'text')
+    public function addField($field, $value, $type = 'str')
     {
         $this->fieldArray[] = '`' . $field . '`';
-        $this->valueArray[] = $this->toSql($value, $type);
+        $this->valueArray[] = array('type' => $type, 'value' => $value);
+    }
+
+    public function addValue($value, $type = 'str')
+    {
+        $this->valueArray[] = array('type' => $type, 'value' => $value);
     }
 
     /**
@@ -187,7 +164,7 @@ class Chan
      **/
     public function getFileName($field)
     {
-        $sql = sprintf("SELECT %s FROM %s WHERE %s = %s",
+        $sql = sprintf("SELECT `%s` FROM `%s` WHERE `%s` = %s",
                 $field,
                 $this->table,
                 $this->pk,
@@ -234,14 +211,32 @@ class Chan
      */
     public function dataInsert()
     {
-        $sqlIns = sprintf("INSERT INTO %s (%s) VALUES(%s)",
+        $sql = sprintf("INSERT INTO `%s` (%s) VALUES(%s)",
             $this->table,
             implode(', ', $this->fieldArray),
-            implode(', ', $this->valueArray));
+            implode(', ', array_fill(0, count($this->fieldArray), '?')));
+
+        $result = $this->dbh->prepare($sql);
+
+        if (count($this->valueArray) > 0) {
+            $index = 1;
+
+            foreach ($this->valueArray as $item) {
+                $result->bindValue($index, $item['value'], $this->_paramType[$item['type']]);
+                $index++;
+            }
+        }
 
         $this->clearFields();
 
-        return $this->sqlExecute($sqlIns);
+        if (false === $result->execute()) {
+            $errorMessage = $result->errorInfo();
+            die($errorMessage[2]);
+        }
+
+        $this->lastInsertId = $this->dbh->lastInsertId();
+
+        return true;
     }
 
     /**
@@ -253,25 +248,45 @@ class Chan
     public function dataUpdate($where = null)
     {
         $sqlString = array();
+        $index = 1;
 
         foreach ($this->fieldArray as $k => $v) {
-            $sqlString[] = $v . ' = ' . $this->valueArray[$k];
+            $sqlString[] = $v . ' = ?';
         }
 
         if (null === $where) {
-            $where = sprintf("%s = %s",
-                $this->pk,
-                $this->toSql($this->pkValue, 'int'));
+            $condition = sprintf("`%s` = ?",
+                $this->pk);
+        } else {
+            $condition = $where;
         }
 
-        $sqlUpdate = sprintf("UPDATE %s SET %s WHERE %s",
+        $sql = sprintf("UPDATE `%s` SET %s WHERE %s",
             $this->table,
             implode(', ', $sqlString),
-            $where);
+            $condition);
+
+        $result = $this->dbh->prepare($sql);
+
+        if (count($this->valueArray) > 0) {
+            foreach ($this->valueArray as $item) {
+                $result->bindValue($index, $item['value'], $this->_paramType[$item['type']]);
+                $index++;
+            }
+        }
+
+        if (null === $where) {
+            $result->bindValue($index, $this->pkValue, $this->_paramType['int']);
+        }
 
         $this->clearFields();
 
-        return $this->sqlExecute($sqlUpdate);
+        if (false === $result->execute()) {
+            $errorMessage = $result->errorInfo();
+            die($errorMessage[2]);
+        }
+
+        return true;
     }
 
     /**
@@ -293,22 +308,43 @@ class Chan
      * Delete data
      *
      * @param string $where defined where condition
+     * @return boolean
      */
     public function dataDelete($where = null)
     {
+        $index = 1;
+
         if (null === $where) {
-            $where = sprintf("%s = %s",
-                $this->pk,
-                $this->toSql($this->pkValue, 'int'));
+            $sql = sprintf("DELETE FROM `%s` WHERE `%s` = ?",
+                $this->table,
+                $this->pk);
+        } else {
+            $sql = sprintf("DELETE FROM `%s` WHERE %s",
+                $this->table,
+                $where);
         }
 
-        $sqlDel = sprintf("DELETE FROM %s WHERE %s",
-            $this->table,
-            $where);
+        $result = $this->dbh->prepare($sql);
+
+        if (count($this->valueArray) > 0) {
+            foreach ($this->valueArray as $item) {
+                $result->bindValue($index, $item['value'], $this->_paramType[$item['type']]);
+                $index++;
+            }
+        }
+
+        if (null === $where) {
+            $result->bindValue($index, $this->pkValue, $this->_paramType['int']);
+        }
 
         $this->clearFields();
 
-        return $this->sqlExecute($sqlDel);
+        if (false === $result->execute()) {
+            $errorMessage = $result->errorInfo();
+            die($errorMessage[2]);
+        }
+
+        return true;
     }
 
     /**
@@ -318,8 +354,8 @@ class Chan
     {
         $this->pk = '';
         $this->pkValue = '';
-        unset($this->fieldArray);
-        unset($this->valueArray);
+        $this->fieldArray = array();
+        $this->valueArray = array();
     }
 
     /**
@@ -401,7 +437,7 @@ class Chan
 
                         $row = $this->myOneRow($sql);
 
-                        if ($row) {
+                        if (null !== $row) {
                             $this->validateMessage .= $name . $this->_langDuplicate . '<br>';
                             $this->validateError = true;
                         }
@@ -462,10 +498,18 @@ class Chan
      */
     public function myRow($sql = null)
     {
-        $result = $this->dbh->query($sql);
+        $result = $this->dbh->prepare($sql);
+        $index = 1;
 
-        if (false === $result) {
-            $errorMessage = $this->dbh->errorInfo();
+        if (count($this->valueArray) > 0) {
+            foreach ($this->valueArray as $item) {
+                $result->bindValue($index, $item['value'], $this->_paramType[$item['type']]);
+                $index++;
+            }
+        }
+
+        if (false === $result->execute()) {
+            $errorMessage = $result->errorInfo();
             die($errorMessage[2]);
         }
 
@@ -498,6 +542,8 @@ class Chan
             $results = null;
         }
 
+        $this->clearFields();
+
         return $results;
     }
 
@@ -512,6 +558,7 @@ class Chan
     {
         $this->page = isset($_GET['page']) ? intval($_GET['page']) : 0;
         $startRow = $this->page * $max;
+        $tempValue = $this->valueArray;
         $row = $this->myRow($sql);
 
         if (null === $row) {
@@ -520,6 +567,7 @@ class Chan
 
         $this->totalRecordCount = count($row);
         $this->totalPages = ceil($this->totalRecordCount / $max) - 1;
+        $this->valueArray = $tempValue;
         $sqlPages = sprintf("%s LIMIT %d, %d", $sql, $startRow, $max);
         $this->makeRecordCount = false;
         $row = $this->myRow($sqlPages);
@@ -863,7 +911,7 @@ class Chan
             $fileName = date('YmdHis') . rand(1000, 9999);
         }
 
-        $query = $this->myRow($sql);
+        $result = $this->myRow($sql);
         $excel = new PHPExcel;
         $excel->setActiveSheetIndex(0);
         $excel->getActiveSheet()->getDefaultColumnDimension()->setWidth($width);
@@ -874,8 +922,9 @@ class Chan
         }
 
         $rowIndex = 2;
-        if ($query) {
-            foreach ($query as $row) {
+
+        if (null !== $result) {
+            foreach ($result as $row) {
                 foreach ($fields as $k => $v) {
                     $excel->getActiveSheet()->getCellByColumnAndRow($k, $rowIndex)->setValueExplicit($row[$v], $type);
                 }
@@ -1182,8 +1231,8 @@ class Chan
      */
     public function retMaxSort($sort, $where = '1 = 1')
     {
-        $sql = sprintf("SELECT MAX(%s) as `maxSort` FROM %s WHERE %s",
-            '`' . $sort . '`',
+        $sql = sprintf("SELECT MAX(`%s`) as `maxSort` FROM `%s` WHERE %s",
+            $sort,
             $this->table,
             $where);
         $row = $this->myOneRow($sql);
@@ -1903,6 +1952,7 @@ class Chan
      */
     public function migrate()
     {
+        // return false;
         if (0 !== count($this->_columns)) {
             // Creating table
             if (true === $this->timestamp) {
@@ -1964,10 +2014,12 @@ class Chan
                 $this->increments('id');
                 $this->string('name');
                 $this->datetime('created_at');
+                $this->migrationName = 'create_migrations_table';
                 $this->migrate();
             }
         } else {
-            $sql = sprintf("SELECT * FROM `migrations` WHERE `name` = %s", $this->toSql($this->migrationName, 'text'));
+            $sql = 'SELECT * FROM `migrations` WHERE `name` = ?';
+            $this->addValue($this->migrationName);
 
             return $this->myRow($sql);
         }
@@ -1981,7 +2033,7 @@ class Chan
     {
         $this->table = 'migrations';
         $this->addField('name', $this->migrationName);
-        $this->addField('created_at', $this->retNow(), 'date');
+        $this->addField('created_at', $this->retNow());
         $this->save();
     }
 }

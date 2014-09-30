@@ -17,7 +17,7 @@ if (null === $chan->checkMigrations()) {
 $chan->migrationName = 'insert_admin_default';
 if (null === $chan->checkMigrations()) {
     $chan->table = 'admins';
-    $chan->addField('name', 'admin');
+    $chan->addField('username', 'admin');
     $chan->addField('password', 1234);
     $chan->addField('on', 1, 'int');
     $chan->addField('created_at', $chan->retNow());

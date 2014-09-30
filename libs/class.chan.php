@@ -377,7 +377,7 @@ class Chan
      * @param integer $limit string max length
      * @param string $method form method
      */
-    public function addValidateField($name, $field, $type = 'text', $tableField = '', $limit = 0, $method = 'POST')
+    public function addValidateField($name, $field, $type = 'text', $tableField = '', $limit = 0, $method = 'post')
     {
         array_push($this->validateArray,
             array(
@@ -403,7 +403,7 @@ class Chan
         $booleanPattern = '/^\d{0,1}+$/';
 
         foreach ($this->validateArray as $v) {
-            $value = ($v['type'] == 'file') ? @$_FILES[$v['field']]['name'] : (($v['method'] == 'POST') ? @$_POST[$v['field']] : @$_GET[$v['field']]);
+            $value = ($v['type'] === 'file') ? $_FILES[$v['field']]['name'] : (($v['method'] === 'post') ? $_POST[$v['field']] : $_GET[$v['field']]);
             $name = $v['name'];
             $type = $v['type'];
             $tableField = $v['tableField'];
@@ -422,20 +422,20 @@ class Chan
                     case 'duplicate':
                         if ('' === $this->pkValue) {
                             // Check if duplicate
-                            $sql = sprintf("SELECT * FROM `%s` WHERE %s = %s",
+                            $sql = sprintf("SELECT * FROM `%s` WHERE %s = ?",
                                 $this->table,
-                                $tableField,
-                                $this->toSql($value, 'text'));
+                                $tableField);
+                            $this->addValue($value);
                         } else {
-                            $sql = sprintf("SELECT * FROM `%s` WHERE `%s` = %s AND %s != %s",
+                            $sql = sprintf("SELECT * FROM `%s` WHERE %s = ? AND `%s` != ?",
                                 $this->table,
                                 $tableField,
-                                $this->toSql($value, 'text'),
-                                $this->pk,
-                                $this->toSql($this->pkValue, 'int'));
+                                $this->pk);
+                            $this->addValue($value);
+                            $this->addValue($this->pkValue, 'int');
                         }
 
-                        $row = $this->myOneRow($sql);
+                        $row = $this->myRow($sql);
 
                         if (null !== $row) {
                             $this->validateMessage .= $name . $this->_langDuplicate . '<br>';
@@ -443,10 +443,12 @@ class Chan
                         }
 
                         break;
-                    default: $pattern = '';
+                    default:
+                        $pattern = '';
+                        break;
                 }
 
-                if (false === empty($pattern) && false === preg_match($pattern, $value)) {
+                if (false === empty($pattern) && !preg_match($pattern, $value)) {
                     $this->validateMessage .= $name . $this->_langFormatInvalid . '<br>';
                     $this->validateError = true;
                 } else {

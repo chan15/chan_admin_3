@@ -99,7 +99,7 @@ class Chan
             die('連線發生錯誤');
         }
 
-        $path = dirname(dirname(__FILE__)) . '\vendor\claymm\verot-upload\lib\Upload.php';
+        $path = dirname(dirname(__FILE__)) . '/vendor/claymm/verot-upload/lib/Upload.php';
         include $path;
     }
 

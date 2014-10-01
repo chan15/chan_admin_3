@@ -1,3 +1,4 @@
 *.swp
 /vendor
+/templates_c
 composer.lock

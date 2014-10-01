@@ -36,9 +36,11 @@ switch ($method) {
         break;
     case 'square':
         if ($ratio > $sourceWidth || $ratio > $sourceHeight) {
-            if ($sourceWidth > $sourceHeight) {
+            if ($width >= $height) {
+                // Landscape
                 $layer->resizeInPixel($ratio + $sourceWidth + $padding, null, true, 0, 0, 'MT');
             } else {
+                // Portrait
                 $layer->resizeInPixel(null, $ratio + $sourceHeight + $padding, true, 0, 0, 'MT');
             }
         }
@@ -47,9 +49,11 @@ switch ($method) {
         break;
     case 'fit':
         if ($width > $sourceWidth || $height > $sourceHeight) {
-            if ($width > $height) {
+            if ($width >= $height) {
+                // Landscape
                 $layer->resizeInPixel($width, null, true, 0, 0, 'MT');
             } else {
+                // Portrait
                 $layer->resizeInPixel(null, $height, true, 0, 0, 'MT');
             }
         }

@@ -3,6 +3,11 @@
 include 'main.php';
 
 $path = $_GET['path'];
+
+if (false === file_exists($path)) {
+    $path = 'assets/default/images/transparent.png';
+}
+
 $ratio = $_GET['ratio'];
 $denomination = explode('x', $ratio);
 $method = $_GET['method'];
@@ -12,8 +17,9 @@ if (count($denomination) > 1) {
     $height = $denomination[1];
 }
 
-$file = pathinfo($path, PATHINFO_FILENAME) . '.' . pathinfo($path, PATHINFO_EXTENSION);
 $ext = pathinfo($path, PATHINFO_EXTENSION);
+$file = pathinfo($path, PATHINFO_FILENAME) . '.' . $ext;
+
 $layer = PHPImageWorkshop\ImageWorkshop::initFromPath($path);
 $sourceWidth = $layer->getWidth();
 $sourceHeight = $layer->getHeight();
@@ -24,7 +30,7 @@ if ($sourceWidth > $sourceHeight) {
     $padding = (($sourceHeight - $sourceWidth) * 2);
 }
 
-switch ($_GET['method']) {
+switch ($method) {
     case 'resize':
         $layer->resizeByLargestSideInPixel($width, $height);
         break;

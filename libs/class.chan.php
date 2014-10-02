@@ -1536,7 +1536,6 @@ class Chan
                     $height);
             }
         } else {
-            include_once($class);
             $foo = new Upload($dir . $img, $this->imageLang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;

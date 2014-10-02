@@ -17,9 +17,4 @@ $smarty->cache_dir = $path . '/cache/';
 include 'libs/class.chan.php';
 $chan = new Chan;
 
-$chan->host = DB_HOST;
-$chan->db = DB_DB;
-$chan->username = DB_USERNAME;
-$chan->password = DB_PASSWORD;
-
 $chan->sessionOn();

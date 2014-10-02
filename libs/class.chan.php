@@ -1292,7 +1292,7 @@ class Chan
         $error ='';
         $imgName = '';
         $fileName = date('YmdHis') . rand(1000, 9999);
-        $handle = new upload($_FILES[$file], $this->imageLang);
+        $handle = new Upload($_FILES[$file], $this->imageLang);
         $handle->file_new_name_body = $fileName;
         $handle->file_max_size = $this->fileUploadSize;
         $handle->process($path);
@@ -1322,7 +1322,7 @@ class Chan
         $error ='';
         $imgName = '';
         $imgName = date('YmdHis') . rand(1000, 9999);
-        $handle = new upload($_FILES[$img], $this->imageLang);
+        $handle = new Upload($_FILES[$img], $this->imageLang);
         $handle->file_new_name_body = $imgName;
         $handle->file_max_size = $this->imageUploadSize;
         $handle->allowed = $this->imageUploadAllowed;
@@ -1466,7 +1466,7 @@ class Chan
                     $ratio);
             }
         } else {
-            $foo = new upload($dir . $img, $this->imageLang);
+            $foo = new Upload($dir . $img, $this->imageLang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
@@ -1537,7 +1537,7 @@ class Chan
             }
         } else {
             include_once($class);
-            $foo = new upload($dir . $img, $this->imageLang);
+            $foo = new Upload($dir . $img, $this->imageLang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;

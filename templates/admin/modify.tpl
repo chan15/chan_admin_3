@@ -1,10 +1,10 @@
-{extends file='admin/layout.tpl'}
+{extends file="admin/layout.tpl"}
 
-{block name='javascript'}
+{block name="javascript"}
 <script src="js/modify.js" type="text/javascript"></script>
 {/block}
 
-{block name='content'}
+{block name="content"}
 <div class="container">
     <div class="row">
         <div class="col-md-12">

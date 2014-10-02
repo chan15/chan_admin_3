@@ -1,10 +1,10 @@
-{extends file='admin/layout.tpl'}
+{extends file="admin/layout.tpl"}
 
-{block name='javascript'}
+{block name="javascript"}
 <script src="js/list.js" type="text/javascript"></script>
 {/block}
 
-{block name='content'}
+{block name="content"}
 <input type="hidden" name="id-serial" id="id-serial">
 <input type="hidden" name="sort-serial" id="sort-serial">
 <input type="hidden" name="table-field" id="table-field" value="{$tableField}">

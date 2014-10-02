@@ -20,7 +20,6 @@
     <script src="js/jquery/jquery.relatedselects.min.js" type="text/javascript"></script>
     <script src="js/bootstrap/bootstrap.min.js" type="text/javascript"></script>
     <script src="ckeditor/ckeditor.js" type="text/javascript"></script>
-    <script src="ckeditor/config.js" type="text/javascript"></script>
     <script src="ckeditor/adapters/jquery.js" type="text/javascript"></script>
     <script src="js/initial.js" type="text/javascript"></script>
     {block name="javascript"}{/block}

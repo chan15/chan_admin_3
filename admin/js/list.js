@@ -4,7 +4,7 @@ $(function() {
         btnSaveSort = $('#btn-save-sort'),
         btnDeleteAll = $('.btn-del-all'),
         mainTable = $('#main-table');
-        
+
     // PrettyPhoto
     $("a[rel^='prettyPhoto']").prettyPhoto({
         social_tools: false,
@@ -64,7 +64,7 @@ $(function() {
         if (confirm('確定要刪除嗎？')) {
             admin.showModal();
             $.post('multi_delete.php', {tableField: tableField, id: id}, function() {
-                window.location.reload();	
+                window.location.reload();
             });
         }
 
@@ -85,7 +85,7 @@ $(function() {
                     admin.showModal();
 
 					$.post('multi_delete.php', {tableField: tableField, id: id}, function() {
-						window.location.reload();	
+						window.location.reload();
 					});
 			};
         }

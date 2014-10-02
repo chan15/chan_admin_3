@@ -1,5 +1,5 @@
 CKEDITOR.editorConfig = function( config ) {
-	config.toolbar = 
+	config.toolbar =
 		[
 			{name:'document', items:['Source','-','Preview','Print']},
 			{name:'clipboard', items:['Cut','Copy','Paste','PasteText','PasteFromWord','-','Undo','Redo']},

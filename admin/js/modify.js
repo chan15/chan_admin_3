@@ -30,7 +30,7 @@ $(function() {
 	$.validator.addClassRules("isNeed", {
 		required: true
 	})
-	
+
 	$.validator.addClassRules("isEmail", {
 		email: true
 	})

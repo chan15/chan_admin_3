@@ -14,5 +14,3 @@ CKEDITOR.editorConfig = function( config ) {
     config.height = 400;
 	config.filebrowserImageUploadUrl = 'ckeditor_upload.php';
 };
-
-

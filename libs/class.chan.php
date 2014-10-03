@@ -83,7 +83,7 @@ class Chan
         $this->password = DB_PASSWORD;
 
         try {
-            $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->db;
+            $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->db . ';charset=utf8';
             $this->dbh = new PDO($dsn, $this->username, $this->password);
         } catch (PDOException $e) {
             die('連線發生錯誤');

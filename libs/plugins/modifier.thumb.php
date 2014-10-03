@@ -13,5 +13,6 @@
  */
 function smarty_modifier_thumb($src, $path = '/', $width = 100, $height = 100, $noFile = '', $nameOnly = false) {
     global $chan;
+
 	return $chan->thumb($path, $src, $width, $height, $noFile, $nameOnly);
 }

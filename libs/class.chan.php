@@ -1108,7 +1108,7 @@ class Chan
         $mailer = Swift_Mailer::newInstance($transport);
         $message = Swift_Message::newInstance($this->emailSubject)
           ->setFrom(array($this->emailFrom => $this->emailFromName))
-          ->setTo(array($this->emailTo))
+          ->setTo($this->emailTo)
           ->setBody($this->emailContent);
         $result = $mailer->send($message);
 

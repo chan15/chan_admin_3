@@ -1279,7 +1279,7 @@ class Chan
      **/
     public function fileUpload($path = '/', $file = '')
     {
-        $error ='';
+        $error = '';
         $imgName = '';
         $fileName = date('YmdHis') . rand(1000, 9999);
         $handle = new Upload($_FILES[$file], $this->imageLang);
@@ -1309,7 +1309,7 @@ class Chan
      **/
     public function imageUpload($path = '/', $img = '')
     {
-        $error ='';
+        $error = '';
         $imgName = '';
         $imgName = date('YmdHis') . rand(1000, 9999);
         $handle = new Upload($_FILES[$img], $this->imageLang);

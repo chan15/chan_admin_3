@@ -35,8 +35,9 @@ class Migration extends Chan
     public function string($name, $length = 255)
     {
         if ('' !== $this->column) {
+            $length = (0 === intval($name)) ? 255 : intval($name);
             $this->column .= sprintf(" VARCHAR(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",
-                intval($name));
+                intval($length));
         } else {
             $this->_columnName = $name;
             $this->_columns[$name] = sprintf("`%s` VARCHAR(%s) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL",

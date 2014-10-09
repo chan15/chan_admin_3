@@ -1580,4 +1580,39 @@ class Chan
 
         return $result;
     }
+
+    /**
+     * Get content by cURL
+     *
+     * @param string $soruce source
+     * @param string $type (post|get)
+     * @return string
+     */
+    public function curl($source = null, $type = 'get', $fields = array())
+    {
+        $result = '';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_URL, $source);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+
+        if ('post' === strtolower($type)) {
+            curl_setopt($ch, CURLOPT_POST, true);
+
+            if (0 !== count($fields)) {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+            }
+        }
+
+        $result = curl_exec($ch);
+
+        if (false === $result) {
+            $result = curl_error($ch);
+        }
+
+        curl_close($ch);
+
+        return $result;
+    }
 }

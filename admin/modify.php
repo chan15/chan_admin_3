@@ -37,7 +37,7 @@ if (true === isset($_POST['modify'])) {
 		if (true === $haveUpload) {
 			foreach ($fileField as $k => $field) {
 				if ('' !== $_FILES[$field]['name']) {
-					$upload = $chan->imageUpload($path, $field);
+					$upload = $chan->imageUpload('../' . $path, $field);
 
 					if ('' !== $upload['err']) {
 						echo $upload['err'];

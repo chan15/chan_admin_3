@@ -1615,4 +1615,20 @@ class Chan
 
         return $result;
     }
+
+    /**
+     * Split field as individual array
+     *
+     * @param array $items array item
+     * @param array $fieldName field name
+     * @return array
+     */
+    public function lists($items, $fieldName)
+    {
+        $result = array_map(function ($item) use ($fieldName) {
+            return $item[$fieldName];
+        }, $items);
+
+        return $result;
+    }
 }

@@ -30,7 +30,7 @@
                                 <label>產品圖片</label>
                                 <div>
                                     {if null !== $data.image}
-                                    <img src="{$data.image|thumb:$path:100:100}">
+                                    <img src="{$data.image|workshop:$path:100x100}">
                                     {/if}
                                 </div>
                                 <input id="image" name="image" type="file">

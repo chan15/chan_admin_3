@@ -10,7 +10,7 @@ $fileName = '';
 include 'nav.php';
 include 'options.php';
 $smarty->assign('yesNoOption', $yesNoOption);
-$path = '../uploads/' . $tableName . '/';
+$path = 'uploads/' . $tableName . '/';
 $smarty->assign('path', $path);
 $fileField = array();
 $fileRealField = array();

@@ -269,6 +269,8 @@ class Chan
             $result->bindValue($index, $this->pkValue, $this->_paramType['int']);
         }
 
+        $this->pk = '';
+        $this->pkValue = '';
         $this->clearFields();
 
         if (false === $result->execute()) {
@@ -342,8 +344,6 @@ class Chan
      */
     public function clearFields()
     {
-        $this->pk = '';
-        $this->pkValue = '';
         $this->fieldArray = array();
         $this->valueArray = array();
     }

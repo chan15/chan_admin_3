@@ -1,16 +1,17 @@
 <?php
+
 include '../main.php';
 include 'login-policy.php';
 $chan->checkSourceUrl();
 
 $id = $_POST['id'];
 $tableField = $_POST['tableField'];
-$idArr = explode(',', $id);
+$ids = explode(',', $id);
 
-foreach ($idArr as $k) {
+foreach ($ids as $id) {
     $chan->table = $tableField;
 	$chan->pk = 'id';
-	$chan->pkValue = $k;
+	$chan->pkValue = $id;
 
 	// Delete file if needed
 	switch($tableField) {
@@ -26,8 +27,8 @@ foreach ($idArr as $k) {
     // Delete detail data if needed
     switch ($tableField) {
         case 'table':
-            $sqlDetail = sprintf("SELECT `id`, `image` FROM `detail_table` WHERE `fk` = %s",
-                $chan->toSql($k, 'int'));
+            $sqlDetail = "SELECT `id`, `image` FROM `detail_table` WHERE `fk` = ?";
+            $chan->addValue($id, 'int');
             $rowDetail = $chan->myRow($sqlDetail);
 
             if (null !== $rowDetail) {

@@ -1,4 +1,5 @@
 <?php
+
 include '../main.php';
 $loginAuth = 0;
 include 'login-policy.php';

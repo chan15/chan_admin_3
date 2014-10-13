@@ -1631,4 +1631,18 @@ class Chan
 
         return $result;
     }
+
+    /**
+     * Force download file
+     *
+     * @param string $fileName file name you want
+     * @param string $path absolute path of the file
+     */
+    public function download($fileName, $path)
+    {
+        header('Content-Type: application/octet-stream');
+        header('Content-Transfer-Encoding: Binary');
+        header('Content-disposition: attachment; filename="' . $fileName . '"');
+        readfile($path);
+    }
 }

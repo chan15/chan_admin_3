@@ -60,6 +60,7 @@ class Chan
     // File variable
     public $fileUploadAllowed = array('image/*, application/*, archives/zip');
     public $fileUploadSize    = 5242880;
+    public $fileMimeCheck     = true;
 
     // Language variable
     private $_langPrevPage = '上一頁';
@@ -1285,6 +1286,8 @@ class Chan
         $handle = new Upload($_FILES[$file], $this->imageLang);
         $handle->file_new_name_body = $fileName;
         $handle->file_max_size = $this->fileUploadSize;
+        $handle->mime_check = $this->fileMimeCheck;
+        $handle->allowed = $this->fileUploadAllowed;
         $handle->process($path);
 
         if (false === $handle->processed) {

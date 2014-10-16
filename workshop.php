@@ -38,27 +38,27 @@ switch ($method) {
         if ($ratio > $sourceWidth || $ratio > $sourceHeight) {
             if ($width >= $height) {
                 // Landscape
-                $layer->resizeInPixel($ratio + $sourceWidth + $padding, null, true, 0, 0, 'MT');
+                $layer->resizeInPixel($ratio + $sourceWidth + $padding, null, true, 0, 0, 'MM');
             } else {
                 // Portrait
-                $layer->resizeInPixel(null, $ratio + $sourceHeight + $padding, true, 0, 0, 'MT');
+                $layer->resizeInPixel(null, $ratio + $sourceHeight + $padding, true, 0, 0, 'MM');
             }
         }
 
-        $layer->cropInPixel($ratio, $ratio, 0, 0, 'MT');
+        $layer->cropInPixel($ratio, $ratio, 0, 0, 'MM');
         break;
     case 'fit':
         if ($width > $sourceWidth || $height > $sourceHeight) {
             if ($width >= $height) {
                 // Landscape
-                $layer->resizeInPixel($width, null, true, 0, 0, 'MT');
+                $layer->resizeInPixel($width, null, true, 0, 0, 'MM');
             } else {
                 // Portrait
-                $layer->resizeInPixel(null, $height, true, 0, 0, 'MT');
+                $layer->resizeInPixel(null, $height, true, 0, 0, 'MM');
             }
         }
 
-        $layer->cropInPixel($width, $height, 0, 0, 'MT');
+        $layer->cropInPixel($width, $height, 0, 0, 'MM');
         break;
 }
 

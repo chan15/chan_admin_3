@@ -1646,6 +1646,6 @@ class Chan
         header('Content-Type: application/octet-stream');
         header('Content-Transfer-Encoding: Binary');
         header('Content-disposition: attachment; filename="' . $fileName . '"');
-        readfile($path);
+        echo file_get_contents($path);
     }
 }

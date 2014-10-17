@@ -5,6 +5,14 @@
         "maatwebsite/excel": "dev-master",
         "sunra/php-simple-html-dom-parser": "dev-master",
         "swiftmailer/swiftmailer": "5.3.*@dev",
-	"sybio/image-workshop": "dev-master"
+        "sybio/image-workshop": "dev-master"
+    },
+    "autoload": {
+        "files": [
+            "libs/plugins/modifier.cut_str.php",
+            "libs/plugins/modifier.fit_thumb.php",
+            "libs/plugins/modifier.thumb.php",
+            "libs/plugins/modifier.workshop.php"
+        ]
     }
 }

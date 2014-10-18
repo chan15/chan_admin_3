@@ -89,9 +89,6 @@ class Chan
         } catch (PDOException $e) {
             die('連線發生錯誤');
         }
-
-        $path = dirname(dirname(__FILE__)) . '/vendor/claymm/verot-upload/lib/Upload.php';
-        include_once $path;
     }
 
     public function __destruct()
@@ -1283,7 +1280,7 @@ class Chan
         $error = '';
         $imgName = '';
         $fileName = date('YmdHis') . rand(1000, 9999);
-        $handle = new Upload($_FILES[$file], $this->imageLang);
+        $handle = new upload($_FILES[$file], $this->imageLang);
         $handle->file_new_name_body = $fileName;
         $handle->file_max_size = $this->fileUploadSize;
         $handle->mime_check = $this->fileMimeCheck;
@@ -1293,6 +1290,8 @@ class Chan
         if (false === $handle->processed) {
             $error = $handle->error;
         }
+
+        $handle->clean();
 
         return array(
             'err'        => $error,
@@ -1315,7 +1314,7 @@ class Chan
         $error = '';
         $imgName = '';
         $imgName = date('YmdHis') . rand(1000, 9999);
-        $handle = new Upload($_FILES[$img], $this->imageLang);
+        $handle = new upload($_FILES[$img], $this->imageLang);
         $handle->file_new_name_body = $imgName;
         $handle->file_max_size = $this->imageUploadSize;
         $handle->allowed = $this->imageUploadAllowed;
@@ -1330,6 +1329,8 @@ class Chan
         if (false === $handle->processed) {
             $error = $handle->error;
         }
+
+        $handle->clean();
 
         return array(
             'err'        => $error,
@@ -1361,6 +1362,7 @@ class Chan
             $width,
             $height);
         $thumbName = $thumbDir . $thumbBody . '.' . $ext;
+        $result = null;
 
         if ('' === $noFile) {
             $noFile = $this->_langFileNotExist;
@@ -1372,17 +1374,16 @@ class Chan
 
         if (true === file_exists($thumbName)) {
             if (true === $nameOnly) {
-                return $thumbName;
+                $result = $thumbName;
             } else {
                 list($width, $height) = getimagesize($thumbName);
-
-                return sprintf('<img src="%s" width="%s" height="%s">',
+                $result = sprintf('<img src="%s" width="%s" height="%s">',
                     $thumbName,
                     $width,
                     $height);
             }
         } else {
-            $foo = new Upload($dir . $img, $this->imageLang);
+            $foo = new upload($dir . $img, $this->imageLang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
@@ -1405,19 +1406,21 @@ class Chan
 
             if (true === $foo->processed) {
                 if (true === $nameOnly) {
-                    return $thumbName;
+                    $result = $thumbName;
                 } else {
-                    return sprintf('<img src="%s" width="%s" height="%s">',
+                    $result = sprintf('<img src="%s" width="%s" height="%s">',
                         $thumbName,
                         $foo->image_dst_x,
                         $foo->image_dst_y);
                 }
             } else {
                 if (true === $this->thumbDebug) {
-                    return $foo->error;
+                    $result = $foo->error;
                 }
             }
         }
+
+        return $result;
     }
 
     /**
@@ -1440,6 +1443,7 @@ class Chan
             $body,
             $ratio);
         $thumbName = $thumbDir . $thumbBody . '.' . $ext;
+        $result = null;
 
         if ('' === $noFile) {
             $noFile = $this->_langFileNotExist;
@@ -1451,15 +1455,15 @@ class Chan
 
         if (true === file_exists($thumbName)) {
             if (true === $nameOnly) {
-                return $thumbName;
+                $result = $thumbName;
             } else {
-                return sprintf('<img src="%s" width="%s" height="%s">',
+                $result = sprintf('<img src="%s" width="%s" height="%s">',
                     $thumbName,
                     $ratio,
                     $ratio);
             }
         } else {
-            $foo = new Upload($dir . $img, $this->imageLang);
+            $foo = new upload($dir . $img, $this->imageLang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
@@ -1472,19 +1476,21 @@ class Chan
 
             if (true === $foo->processed) {
                 if (true === $nameOnly) {
-                    return $thumbName;
+                    $result = $thumbName;
                 } else {
-                    return sprintf('<img src="%s" width="%s" height="%s">',
+                    $result = sprintf('<img src="%s" width="%s" height="%s">',
                         $thumbName,
                         $ratio,
                         $ratio);
                 }
             } else {
                 if (true === $this->thumbDebug) {
-                    return $foo->error;
+                    $result = $foo->error;
                 }
             }
         }
+
+        return $result;
     }
 
     /**
@@ -1509,6 +1515,7 @@ class Chan
             $width,
             $height);
         $thumbName = $thumbDir . $thumbBody . '.' . $ext;
+        $result = null;
 
         if ('' === $noFile) {
             $noFile = $this->_langFileNotExist;
@@ -1520,16 +1527,16 @@ class Chan
 
         if (true === file_exists($thumbName)) {
             if (true === $nameOnly) {
-                return $thumbName;
+                $result = $thumbName;
             } else {
                 list($width, $height) = getimagesize($thumbName);
-                return sprintf('<img src="%s" width="%s" height="%s">',
+                $result = sprintf('<img src="%s" width="%s" height="%s">',
                     $thumbName,
                     $width,
                     $height);
             }
         } else {
-            $foo = new Upload($dir . $img, $this->imageLang);
+            $foo = new upload($dir . $img, $this->imageLang);
             $foo->file_new_name_body = $thumbBody;
             $foo->file_overwrite = true;
             $foo->jpeg_quality = 100;
@@ -1551,19 +1558,21 @@ class Chan
 
             if (true === $foo->processed) {
                 if (true === $nameOnly) {
-                    return $thumbName;
+                    $result = $thumbName;
                 } else {
-                    return sprintf('<img src="%s" width="%s" height="%s">',
+                    $result = sprintf('<img src="%s" width="%s" height="%s">',
                         $thumbName,
                         $foo->image_dst_x,
                         $foo->image_dst_y);
                 }
             } else {
                 if (true === $this->thumbDebug) {
-                    return $foo->error;
+                    $result = $foo->error;
                 }
             }
         }
+
+        return $result;
     }
 
     /**

@@ -1,6 +1,6 @@
-<?php
+<?php namespace Chan;
 
-class Migration extends Chan
+class Migration extends \Chan\Chan
 {
     // Migration variable
     private $_columns = array();

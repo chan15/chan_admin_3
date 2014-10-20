@@ -1,9 +1,8 @@
 <?php
 
 include 'main.php';
-include 'libs/class.migration.php';
 
-$migration = new Migration;
+$migration = new \Chan\Migration;
 $migration->checkMigrations();
 
 $migration->migrationName = 'create_admins_table';

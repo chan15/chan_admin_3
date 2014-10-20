@@ -13,6 +13,9 @@
             "libs/plugins/modifier.fit_thumb.php",
             "libs/plugins/modifier.thumb.php",
             "libs/plugins/modifier.workshop.php"
-        ]
+        ],
+        "psr-4": {
+            "Chan\\": "chan"
+        }
     }
 }

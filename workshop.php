@@ -57,7 +57,7 @@ switch ($method) {
                 $layer->resizeInPixel(null, $height, true, 0, 0, 'MM');
             }
         } else {
-            $layer->resizeByLargestSideInPixel($width, $height);
+            $layer->resizeByNarrowSideInPixel($width, $height);
         }
 
         $layer->cropInPixel($width, $height, 0, 0, 'MM');

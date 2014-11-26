@@ -1,8 +1,8 @@
 <?php namespace Chan;
 
-use \PDO;
-use \upload;
-use \PHPExcel;
+use PDO;
+use upload;
+use PHPExcel;
 
 class Chan
 {
@@ -84,10 +84,14 @@ class Chan
         $this->db = DB_DB;
         $this->username = DB_USERNAME;
         $this->password = DB_PASSWORD;
+        $options = array(
+            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        );
 
         try {
             $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->db . ';charset=utf8';
-            $this->dbh = new PDO($dsn, $this->username, $this->password);
+            $this->dbh = new PDO($dsn, $this->username, $this->password, $options);
         } catch (PDOException $e) {
             die('連線發生錯誤');
         }
@@ -104,7 +108,9 @@ class Chan
      */
     public function sessionOn()
     {
-        if (false === isset($_SESSION)) session_start();
+        if (false === isset($_SESSION)) {
+            session_start();
+        }
     }
 
     /**
@@ -120,6 +126,7 @@ class Chan
         if (false === $result->execute()) {
             $errorMessage = $this->dbh->errorInfo();
             $this->sqlErrorMessage = $errorMessage[2];
+
             return false;
         }
 
@@ -512,24 +519,7 @@ class Chan
         }
 
         if ($this->recordCount > 0) {
-            $names = array();
-            $results = array();
-            $temp = array();
-            $columnCount = $result->columnCount();
-
-            // Get fields name
-            for ($i = 0; $i < $columnCount; $i++) {
-                $meta = $result->getColumnMeta($i);
-                $columnNames[] = $meta['name'];
-            }
-
-            while ($row = $result->fetch()) {
-                foreach ($columnNames as $columnName) {
-                    $temp[$columnName] = $row[$columnName];
-                }
-
-                array_push($results, $temp);
-            }
+            $results = $result->fetchAll(PDO::FETCH_ASSOC);
         } else {
             $results = null;
         }

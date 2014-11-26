@@ -14,4 +14,4 @@ $smarty->compile_dir = $path . '/templates_c/';
 $smarty->config_dir = $path . '/configs/';
 $smarty->cache_dir = $path . '/cache/';
 
-$chan = new \Chan\Chan;
+$chan = new Chan\Chan;

@@ -12,5 +12,5 @@
 function smarty_modifier_workshop($source, $path, $ratio, $method = 'resize') {
     $file = $path . $source;
 
-    return SITE_HOST . "/workshop.php?path={$file}&ratio={$ratio}&method={$method}";
+    return "/workshop.php?path={$file}&ratio={$ratio}&method={$method}";
 }

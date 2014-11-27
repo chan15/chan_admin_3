@@ -1,6 +1,7 @@
 <?php
 
-include_once '../main.php';
+include dirname(__DIR__) . '/main.php';
+
 $chan->checkSourceUrl();
 
 $tableField = @$_POST['tableField'];
@@ -15,7 +16,7 @@ $ids   = explode(',', $idSerial);
 $sorts = explode(',', $sortSerial);
 
 if (count($ids) != count($sorts)) {
-    exit;
+    die('參數錯誤');
 }
 
 // start update sort

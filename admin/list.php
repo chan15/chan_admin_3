@@ -1,6 +1,7 @@
 <?php
 
-include '../main.php';
+include dirname(__DIR__) . '/main.php';
+
 $loginAuth = 0;
 include 'login-policy.php';
 $pageItemName = '';
@@ -9,9 +10,8 @@ $tableName = '';
 $fileName = '';
 include 'nav.php';
 include 'options.php';
-$smarty->assign('yesNoSearchOption', $yesNoSearchOption);
-$smarty->assign('yesNoListOption', $yesNoListOption);
-$smarty->assign('pageLimitOption', $pageLimitOption);
+$options = include 'options.php';
+$smarty->assign('options', $options);
 $limit = (true === isset($_GET['limit'])) ? $_GET['limit'] : 20;
 $smarty->assign('limit', $limit);
 

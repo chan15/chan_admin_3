@@ -21,7 +21,7 @@
                 <input type="text" name="name" value="{$smarty.get.name|default:''}" class="form-control input-sm" placeholder="請輸入名稱">
             </div>
             <div class="form-group">
-                {html_options name="on" options=$yesNoSearchOption selected="{$smarty.get.on|default:''}" class="form-control input-sm"}
+                {html_options name="on" options=$options['yesNoSearchOption'] selected="{$smarty.get.on|default:''}" class="form-control input-sm"}
             </div>
             <input type="hidden" name="limit" value="{$limit}">
             <button type="submit" class="btn btn-sm">搜尋</button>
@@ -36,7 +36,7 @@
         <form name="limit-form" id="limit-form" action="{$smarty.server.PHP_SELF}" method="GET" class="form-inline" role="form">
             <strong class="data-count">筆數：{$total} 頁數： {$pageNow} / {$pageTotal}</strong>
             <div class="form-group">
-                {html_options name="limit" id="limit" options=$pageLimitOption selected={$limit} class="input-sm form-control"}
+                {html_options name="limit" id="limit" options=$options['pageLimitOption'] selected={$limit} class="input-sm form-control"}
             </div>
         </form>
     </div>
@@ -57,7 +57,7 @@
             <tr id="{$data.id}" sort="{$data.sort|default:''}">
                 <td><input type="checkbox" class="check-item" id="{$data.id}"></td>
                 <td>{$data.name}</td>
-                <td>{$yesNoListOption[$data.on]|default:''}</td>
+                <td>{$options['yesNoListOption'][$data.on]|default:''}</td>
                 <td>
                     <a href="{$modifyPage}?id={$data.id}" class="btn btn-default btn-xs" title="編輯">編輯</a>
                     <a href="#" id="{$data.id}" name="btn-del" class="btn btn-danger btn-xs" title="刪除">刪除</a>

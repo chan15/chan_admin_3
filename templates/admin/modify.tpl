@@ -41,7 +41,7 @@
                             <div class="col-md-3">
                                 <label>上架</label>
                                 <div class="control-group">
-                                    {html_radios name="on" options=$yesNoOption selected={$data.on|default:''} class="isNeed"}
+                                    {html_radios name="on" options=$options['yesNoOption'] selected={$data.on|default:''} class="isNeed"}
                                 </div>
                             </div>
                         </div>

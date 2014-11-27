@@ -3,7 +3,6 @@
 error_reporting(0);
 header('Content-type: text/html; charset=utf-8');
 include 'const.php';
-include 'config.php';
 include 'vendor/autoload.php';
 
 $smarty = new Smarty;
@@ -15,3 +14,4 @@ $smarty->config_dir = $path . '/configs/';
 $smarty->cache_dir = $path . '/cache/';
 
 $chan = new Chan\Chan('single');
+$chan->sessionOn();

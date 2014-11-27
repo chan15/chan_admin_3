@@ -81,7 +81,7 @@ class Chan
     public function __construct($mode = 'single')
     {
         // Open connection
-        $config = include 'config/database.php';
+        $config = include dirname(__DIR__) . '/config/database.php';
         $config = $config[$mode];
         $dsnRead = null;
         $dsnWrite = null;

@@ -1,5 +1,6 @@
 <?php
-include '../main.php';
+
+include dirname(__DIR__) . '/main.php';
 $chan->checkSourceUrl();
 
 $chan->table = @$_POST['tableField'];

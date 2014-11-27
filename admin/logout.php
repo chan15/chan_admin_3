@@ -1,4 +1,5 @@
 <?php
 
-include_once '../main.php';
+include dirname(__DIR__) . '/main.php';
+
 $chan->logout('index.php');

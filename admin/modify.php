@@ -1,6 +1,7 @@
 <?php
 
-include '../main.php';
+include dirname(__DIR__) . '/main.php';
+
 $loginAuth = 0;
 include 'login-policy.php';
 $pageItemName = '';
@@ -8,8 +9,8 @@ $subItemName = '';
 $tableName = '';
 $fileName = '';
 include 'nav.php';
-include 'options.php';
-$smarty->assign('yesNoOption', $yesNoOption);
+$options = include 'options.php';
+$smarty->assign('options', $options);
 $path = 'uploads/' . $tableName . '/';
 $smarty->assign('path', $path);
 $fileField = array();

@@ -1,6 +1,7 @@
 <?php
 
-include '../main.php';
+include dirname(__DIR__) . '/main.php';
+
 include 'login-policy.php';
 $chan->checkSourceUrl();
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{$smarty.const.ADMIN_TITLE} 管理系統</title>
+    <title>{$smarty.const.SITE_TITLE} 管理系統</title>
     <link rel="stylesheet" href="css/initial.css" />
     <link rel="stylesheet" href="css/smoothness/jquery-ui.css" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
@@ -23,7 +23,7 @@
     <div class="navbar navbar-inverse" role="navigation">
         <div class="navbar-inner">
             <div class="container">
-                <a class="navbar-brand">{$smarty.const.ADMIN_TITLE}</a>
+                <a class="navbar-brand">{$smarty.const.SITE_TITLE}</a>
             </div>
         </div>
     </div>
@@ -31,8 +31,8 @@
         <div class="row">
             <div class="index-center">
                 <div class="jumbotron">
-                    <h1>{$smarty.const.ADMIN_TITLE} 管理系統</h1>
-                    <p>歡迎使用 {$smarty.const.ADMIN_TITLE} 後台管理系統</p>
+                    <h1>{$smarty.const.SITE_TITLE} 管理系統</h1>
+                    <p>歡迎使用 {$smarty.const.SITE_TITLE} 後台管理系統</p>
                     <form name="login-form" id="login-form" class="form-line" autocomplete="off">
                         <div class="form-group">
                             <input type="text" id="username" name="username" placeholder="請輸入帳號" class="input-sm form-control">

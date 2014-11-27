@@ -1,5 +1,6 @@
 <?php
-include '../main.php';
+
+include dirname(__DIR__) . '/main.php';
 
 if (true === isset($_POST['login'])) {
     $chan->checkSourceUrl();
@@ -29,4 +30,3 @@ if (true === isset($_POST['login'])) {
 }
 
 $smarty->display('admin/index.tpl');
-?>

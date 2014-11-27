@@ -1,7 +1,8 @@
 <?php
 
-include'../main.php';
+include dirname(__DIR__) . '/main.php';
 include 'login-policy.php';
+
 $pageItemName = ''; // nav name
 $subItemName = ''; // sidebar name
 include 'nav.php';

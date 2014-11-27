@@ -617,19 +617,18 @@ class Chan
             die($errorMessage[2]);
         }
 
-        $this->recordCount = $result->rowCount();
+        $results = $result->fetchAll(PDO::FETCH_ASSOC);
+        $this->recordCount = count($results);
 
         if (true === $this->makeRecordCount) {
             $this->totalRecordCount = $this->recordCount;
         }
 
-        if ($this->recordCount > 0) {
-            $results = $result->fetchAll(PDO::FETCH_ASSOC);
-        } else {
-            $results = null;
-        }
-
         $this->clearFields();
+
+        if (0 === $this->recordCount) {
+            return null;
+        }
 
         return $results;
     }

@@ -129,6 +129,22 @@ class Chan
     }
 
     /**
+     * PDO begin transaction
+     *
+     * @return PDO object
+     */
+    public function beginTransaction()
+    {
+        if ($this->dbh !== null) {
+            // Single database
+            return $this->dbh->beginTransaction();
+        } else {
+            // Double database
+            return $this->dbhWrite->beginTransaction();
+        }
+    }
+
+    /**
      * PDO commit transaction
      *
      * @return PDO object

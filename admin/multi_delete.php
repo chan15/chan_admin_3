@@ -22,7 +22,7 @@ foreach ($ids as $id) {
             break;
     }
 
-	$chan->dataDelete();
+	$chan->delete();
 
     // Delete detail data if needed
     switch ($tableField) {
@@ -38,7 +38,7 @@ foreach ($ids as $id) {
                     $chan->pkValue = $detail['id'];
                     $chan->fileDeleteArray[] = $detail['image'];
                     $chan->dataFileDelete($path);
-                    $chan->dataDelete();
+                    $chan->delete();
                 }
             }
 

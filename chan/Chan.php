@@ -12,17 +12,18 @@ class Chan
     public $db               = '';
     public $username         = '';
     public $password         = '';
-    public $dbh              = '';
     public $makeRecordCount  = true;
     public $recordCount      = 0;
     public $totalRecordCount = 0;
-    public $lastInsertId     = 0;
     public $fieldArray       = array();
     public $valueArray       = array();
     public $sqlErrorMessage  = '';
     public $table            = '';
     public $pk               = '';
     public $pkValue          = '';
+    private $dbh             = null;
+    private $dbhRead         = null;
+    private $dbhWrite        = null;
     private $_paramType = array(
         'bool' => PDO::PARAM_BOOL,
         'null' => PDO::PARAM_NULL,
@@ -77,23 +78,35 @@ class Chan
     private $_langSelect = '請選擇';
     private $_langFileNotExist = '檔案不存在';
 
-    public function __construct()
+    public function __construct($mode = 'single')
     {
         // Open connection
-        $this->host = DB_HOST;
-        $this->db = DB_DB;
-        $this->username = DB_USERNAME;
-        $this->password = DB_PASSWORD;
+        $config = include 'config/database.php';
+        $config = $config[$mode];
+        $dsnRead = null;
+        $dsnWrite = null;
+        $dsn = null;
         $options = array(
             PDO::ATTR_PERSISTENT => true,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
         );
 
+        if (is_array($config['host']) === true) {
+            $dsnRead = 'mysql:host=' . $config['host']['read'] . ';dbname=' . $config['database'] . ';charset=utf8';
+            $dsnWrite = 'mysql:host=' . $config['host']['write'] . ';dbname=' . $config['database'] . ';charset=utf8';
+        } else {
+            $dsn = 'mysql:host=' . $config['host'] . ';dbname=' . $config['database'] . ';charset=utf8';
+        }
+
         try {
-            $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->db . ';charset=utf8';
-            $this->dbh = new PDO($dsn, $this->username, $this->password, $options);
+            if ($dsn === null) {
+                $this->dbhRead = new PDO($dsnRead, $config['username'], $config['password'], $options);
+                $this->dbhWrite = new PDO($dsnWrite, $config['username'], $config['password'], $options);
+            } else {
+                $this->dbh = new PDO($dsn, $config['username'], $config['password'], $options);
+            }
         } catch (PDOException $e) {
-            die('連線發生錯誤');
+            die($e->getMessage());
         }
     }
 
@@ -101,6 +114,8 @@ class Chan
     {
         // Close connection
         $this->dbh = null;
+        $this->dbhRead = null;
+        $this->dbhWrite = null;
     }
 
     /**
@@ -114,6 +129,38 @@ class Chan
     }
 
     /**
+     * PDO commit transaction
+     *
+     * @return PDO object
+     */
+    public function commitTransaction()
+    {
+        if ($this->dbh !== null) {
+            // Single database
+            return $this->dbh->commit();
+        } else {
+            // Double database
+            return $this->dbhWrite->commit();
+        }
+    }
+
+    /**
+     * PDO rollback transaction
+     *
+     * @return PDO object
+     */
+    public function rollBackTransaction()
+    {
+        if ($this->dbh !== null) {
+            // Single database
+            return $this->dbh->rollBack();
+        } else {
+            // Double database
+            return $this->dbhWrite->rollBack();
+        }
+    }
+
+    /**
      * Execute sql
      * @param string $sql SQL statement
      *
@@ -121,7 +168,7 @@ class Chan
      */
     public function sqlExecute($sql = null)
     {
-        $result = $this->dbh->prepare($sql);
+        $result = $this->prepare($sql);
 
         if (false === $result->execute()) {
             $errorMessage = $this->dbh->errorInfo();
@@ -130,14 +177,28 @@ class Chan
             return false;
         }
 
-        $this->lastInsertId = $this->dbh->lastInsertId();
         $this->clearFields();
 
         return true;
     }
 
     /**
-     * Table field
+     * Last insert id
+     *
+     * @return integer
+     */
+    public function lastInsertId()
+    {
+        if (null === $this->dbh) {
+            return $this->dbhWrite->lastInsertId();
+        } else {
+            return $this->dbh->lastInsertId();
+        }
+    }
+
+    /**
+     * Add table field
+     *
      * @param mixed $field filed
      * @param mixed $value filed value
      * @param string $type field type
@@ -148,6 +209,13 @@ class Chan
         $this->valueArray[] = array('type' => $type, 'value' => $value);
     }
 
+    /**
+     * Bind PDO value
+     *
+     * $param string $value
+     * $param string $type (bool|null|int|str)
+     * @return void
+     */
     public function addValue($value, $type = 'str')
     {
         $this->valueArray[] = array('type' => $type, 'value' => $value);
@@ -212,8 +280,7 @@ class Chan
             $this->table,
             implode(', ', $this->fieldArray),
             implode(', ', array_fill(0, count($this->fieldArray), '?')));
-
-        $result = $this->dbh->prepare($sql);
+        $result = $this->prepare($sql);
 
         if (count($this->valueArray) > 0) {
             $index = 1;
@@ -230,8 +297,6 @@ class Chan
             $errorMessage = $result->errorInfo();
             die($errorMessage[2]);
         }
-
-        $this->lastInsertId = $this->dbh->lastInsertId();
 
         return true;
     }
@@ -262,8 +327,7 @@ class Chan
             $this->table,
             implode(', ', $sqlString),
             $condition);
-
-        $result = $this->dbh->prepare($sql);
+        $result = $this->prepare($sql);
 
         if (count($this->valueArray) > 0) {
             foreach ($this->valueArray as $item) {
@@ -309,7 +373,7 @@ class Chan
      * @param string $where defined where condition
      * @return boolean
      */
-    public function dataDelete($where = null)
+    public function delete($where = null)
     {
         $index = 1;
 
@@ -323,7 +387,7 @@ class Chan
                 $where);
         }
 
-        $result = $this->dbh->prepare($sql);
+        $result = $this->prepare($sql);
 
         if (count($this->valueArray) > 0) {
             foreach ($this->valueArray as $item) {
@@ -490,6 +554,31 @@ class Chan
     }
 
     /**
+     * PDO prepare
+     *
+     * @param string $sql
+     * @return PDO object
+     */
+    public function prepare($sql)
+    {
+        $result = null;
+
+        if ($this->dbh !== null) {
+            // Single database
+            $result = $this->dbh->prepare($sql);
+        } else {
+            // Double Database
+            if (preg_match('/^select /i', $sql) > 0) {
+                $result = $this->dbhRead->prepare($sql);
+            } else {
+                $result = $this->dbhWrite->prepare($sql);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Get data
      *
      * @param string $sql sql statement
@@ -497,7 +586,7 @@ class Chan
      */
     public function myRow($sql = null)
     {
-        $result = $this->dbh->prepare($sql);
+        $result = $this->prepare($sql);
         $index = 1;
 
         if (count($this->valueArray) > 0) {

@@ -269,8 +269,8 @@ class Chan
                     $thumbDir = $path . '/thumbnails/';
                     $handle = @opendir($thumbDir);
 
-                    while($file = readdir($handle)){
-                        if('.' !== $file && '..' !== $file){
+                    while ($file = readdir($handle)) {
+                        if ('.' !== $file && '..' !== $file) {
                             $fileDel = explode('_', $file);
 
                             if ($fileDelHead[0] === $fileDel[0]) {
@@ -927,7 +927,7 @@ class Chan
         $this->sessionOn();
         $this->loginNeed();
 
-        if(false === in_array(@$_SESSION['level'], $level)) {
+        if (false === in_array(@$_SESSION['level'], $level)) {
             $this->reUrl($this->loginPage);
         }
     }

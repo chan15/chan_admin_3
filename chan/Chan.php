@@ -135,7 +135,7 @@ class Chan
      */
     public function beginTransaction()
     {
-        if ($this->dbh !== null) {
+        if (null !== $this->dbh) {
             // Single database
             return $this->dbh->beginTransaction();
         } else {
@@ -151,7 +151,7 @@ class Chan
      */
     public function commitTransaction()
     {
-        if ($this->dbh !== null) {
+        if (null !== $this->dbh) {
             // Single database
             return $this->dbh->commit();
         } else {
@@ -167,7 +167,7 @@ class Chan
      */
     public function rollBackTransaction()
     {
-        if ($this->dbh !== null) {
+        if (null !== $this->dbh) {
             // Single database
             return $this->dbh->rollBack();
         } else {
@@ -579,7 +579,7 @@ class Chan
     {
         $result = null;
 
-        if ($this->dbh !== null) {
+        if (null !== $this->dbh) {
             // Single database
             $result = $this->dbh->prepare($sql);
         } else {

@@ -6,7 +6,7 @@ $html = HtmlDomParser::file_get_html('nav.xml');
 $navStr = '';
 $mainCss = '';
 
-foreach($html->find('main') as $main) {
+foreach ($html->find('main') as $main) {
 	$mainItem = $main->find('item',0)->plaintext;
 	$mainCss = (strtolower($pageItemName) == strtolower($mainItem)) ? 'active' : '';
     $subMenu = '';

@@ -215,8 +215,8 @@ class Chan
     /**
      * Add table field
      *
-     * @param mixed $field filed
-     * @param mixed $value filed value
+     * @param mixed $field field
+     * @param mixed $value field value
      * @param string $type field type
      */
     public function addField($field, $value, $type = 'str')
@@ -448,7 +448,7 @@ class Chan
     /**
      * Add validate field
      * @param string $name validate name
-     * @param string $field validate filed name
+     * @param string $field validate field name
      * @param string $type validate type (text, email, number, positive, boolean, file, duplicate)
      * @param string $tableField if type equal to duplicate need to type table name
      * @param integer $limit string max length

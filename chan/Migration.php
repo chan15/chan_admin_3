@@ -188,7 +188,7 @@ class Migration extends \Chan\Chan
     /**
      * Build date column
      *
-     * @param string $name filed name
+     * @param string $name field name
      */
     public function date($name)
     {
@@ -206,7 +206,7 @@ class Migration extends \Chan\Chan
     /**
      * Build timestamp column
      *
-     * @param string $name filed name
+     * @param string $name field name
      */
     public function timestamp($name)
     {
@@ -224,7 +224,7 @@ class Migration extends \Chan\Chan
     /**
      * Index column
      *
-     * @param string $name filed name
+     * @param string $name field name
      */
     public function index($name)
     {

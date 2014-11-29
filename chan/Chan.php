@@ -29,6 +29,7 @@ class Chan
         'null' => PDO::PARAM_NULL,
         'int'  => PDO::PARAM_INT,
         'str'  => PDO::PARAM_STR,
+        'date' => PDO::PARAM_STR,
     );
 
     // Email variable

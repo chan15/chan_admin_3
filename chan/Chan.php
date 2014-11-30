@@ -1318,13 +1318,18 @@ class Chan
      */
     public function retMaxSort($sort, $where = '1 = 1')
     {
-        $sql = sprintf("SELECT MAX(`%s`) as `maxSort` FROM `%s` WHERE %s",
+        $sql = sprintf('SELECT MAX(`%s`) as `maxSort` FROM `%s` WHERE %s',
             $sort,
             $this->table,
-            $where);
-        $row = $this->myOneRow($sql);
+            $where
+        );
 
-        return (null === $row) ? 1 : intval($row['maxSort'] + 1);
+        $stmt = $this->dbh->prepare($sql);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return (false === $row) ? 1 : intval($row['maxSort'] + 1);
+
     }
 
     /**
